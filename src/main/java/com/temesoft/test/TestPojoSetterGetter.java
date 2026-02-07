@@ -24,12 +24,10 @@ final class TestPojoSetterGetter {
     }
 
     void testClass() {
-        System.out.println("========== " + this.getClass().getSimpleName() + " ==========; Testing " + clazz.getName());
         final Object object = Instancio.create(clazz);
         final Method[] methods = clazz.getMethods();
         final Field[] fields = clazz.getDeclaredFields();
         for (final Field field : fields) {
-            System.out.println("field.name: " + field.getName() + "; field.type: " + field.getType());
             Method setterMethodFound = getSetterMethodWithNameAndArgumentType(methods, "set" + field.getName(), field.getType());
             if (setterMethodFound == null) {
                 setterMethodFound = getSetterMethodWithNameAndArgumentType(methods, "set_" + field.getName(), field.getType());
@@ -54,8 +52,6 @@ final class TestPojoSetterGetter {
                     && getterMethodFound != null
                     && !isMethodExcluded(setterMethodFound, excludeMethods)
                     && !isMethodExcluded(getterMethodFound, excludeMethods)) {
-                System.out.println("\tsetter method: " + setterMethodFound);
-                System.out.println("\tgetter method: " + getterMethodFound);
                 try {
                     setterMethodFound.invoke(object, value);
                     final Object result = getterMethodFound.invoke(object);

@@ -3,8 +3,11 @@ package com.temesoft.test;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ManualClassFinder {
 
@@ -13,7 +16,8 @@ public class ManualClassFinder {
         final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
         try (final InputStream stream = classLoader.getResourceAsStream(path);
-             final BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+             final BufferedReader reader = new BufferedReader(
+                     new InputStreamReader(Objects.requireNonNull(stream), UTF_8))) {
             return reader.lines()
                     .filter(line -> line.endsWith(".class"))
                     .map(line -> getClass(line, packageName))

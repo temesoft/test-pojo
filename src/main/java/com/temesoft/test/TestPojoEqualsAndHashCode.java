@@ -22,7 +22,6 @@ final class TestPojoEqualsAndHashCode {
     }
 
     void testClass() {
-        System.out.println("========== " + this.getClass().getSimpleName() + " ==========; Testing " + clazz.getName());
         final Object objectRandom1 = Instancio.create(clazz);
         final Object objectRandom2 = Instancio.create(clazz);
         final Method[] methods = clazz.getMethods();

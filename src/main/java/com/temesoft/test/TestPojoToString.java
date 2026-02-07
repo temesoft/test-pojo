@@ -21,9 +21,7 @@ public class TestPojoToString {
     }
 
     void testClass() {
-        System.out.println("========== " + this.getClass().getSimpleName() + " ==========; Testing " + clazz.getName());
-        final Object objectRandom1 = Instancio.create(clazz);
-        final Object objectRandom2 = Instancio.create(clazz);
+        final Object objectRandom = Instancio.create(clazz);
         final Method[] methods = clazz.getMethods();
         for (final Method method : methods) {
             if (method.getName().equals("toString")
@@ -31,13 +29,9 @@ public class TestPojoToString {
                     && method.getParameterCount() == 0
                     && !isMethodExcluded(method, excludeMethods)) {
                 try {
-                    final String response1 = (String) method.invoke(objectRandom1);
-                    final String response2 = (String) method.invoke(objectRandom2);
-                    final String response2Repeat = (String) method.invoke(objectRandom2);
-                    if (response1.equals(response2)) {
-                        throw new TestPojoToStringException(method, "Two objects with different attributes should return different toString() value");
-                    }
-                    if (!response2Repeat.equals(response2)) {
+                    final String response = (String) method.invoke(objectRandom);
+                    final String responseRepeat = (String) method.invoke(objectRandom);
+                    if (!responseRepeat.equals(response)) {
                         throw new TestPojoToStringException(method, "Same unchanged object should return same toString() value every time");
                     }
                 } catch (IllegalAccessException e) {

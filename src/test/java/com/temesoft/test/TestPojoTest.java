@@ -1,5 +1,10 @@
 package com.temesoft.test;
 
+import com.temesoft.test.exception.TestPojoConstructorException;
+import com.temesoft.test.exception.TestPojoEqualsException;
+import com.temesoft.test.exception.TestPojoHashCodeException;
+import com.temesoft.test.exception.TestPojoSetterGetterException;
+import com.temesoft.test.exception.TestPojoToStringException;
 import org.junit.jupiter.api.Test;
 
 public class TestPojoTest {
@@ -32,6 +37,32 @@ public class TestPojoTest {
                 .testSettersGetters()
                 .testEqualsAndHashCode()
                 .testToString();
+    }
+
+    @Test
+    public void testRandomProcessClass_Exceptions() {
+        TestPojo.processClass(
+                        TestPojoConstructorException.class,
+                        TestPojoEqualsException.class,
+                        TestPojoHashCodeException.class,
+                        TestPojoSetterGetterException.class,
+                        TestPojoToStringException.class
+                )
+                .testConstructor()
+                .testToString()
+                .testRandom();
+    }
+
+    @Test
+    public void testRandomProcessClass_Record() {
+        TestPojo.processClass(RecordClass.class)
+                .testRandom()
+                .testSettersGetters()
+                .testEqualsAndHashCode()
+                .testToString();
+    }
+
+    public record RecordClass(String key, Double value, boolean ready) {
     }
 
     static class Pojo1 {

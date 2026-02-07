@@ -6,16 +6,16 @@ import java.util.Set;
 
 public class TestPojo {
 
-    final Class<?> clazz;
+    final Class<?>[] clazz;
     final String packageName;
     private Collection<String> excludeMethods;
 
-    private TestPojo(final Class<?> clazz, final String packageName) {
+    private TestPojo(final Class<?>[] clazz, final String packageName) {
         this.clazz = clazz;
         this.packageName = packageName;
     }
 
-    public static TestPojo processClass(final Class<?> clazz) {
+    public static TestPojo processClass(final Class<?>... clazz) {
         return new TestPojo(clazz, null);
     }
 
@@ -40,7 +40,9 @@ public class TestPojo {
 
     public TestPojo testRandom() {
         if (clazz != null) {
-            new TestPojoRandom(clazz, excludeMethods).testClass();
+            for (final Class<?> aClass : clazz) {
+                new TestPojoRandom(aClass, excludeMethods).testClass();
+            }
         } else if (packageName != null) {
             final Set<Class<?>> classes = ManualClassFinder.findAllClassesUsingClassLoader(packageName);
             classes.forEach(aClass -> new TestPojoRandom(aClass, excludeMethods).testClass());
@@ -50,7 +52,9 @@ public class TestPojo {
 
     public TestPojo testSettersGetters() {
         if (clazz != null) {
-            new TestPojoSetterGetter(clazz, excludeMethods).testClass();
+            for (final Class<?> aClass : clazz) {
+                new TestPojoSetterGetter(aClass, excludeMethods).testClass();
+            }
         } else if (packageName != null) {
             final Set<Class<?>> classes = ManualClassFinder.findAllClassesUsingClassLoader(packageName);
             classes.forEach(aClass -> new TestPojoSetterGetter(aClass, excludeMethods).testClass());
@@ -60,7 +64,9 @@ public class TestPojo {
 
     public TestPojo testEqualsAndHashCode() {
         if (clazz != null) {
-            new TestPojoEqualsAndHashCode(clazz, excludeMethods).testClass();
+            for (final Class<?> aClass : clazz) {
+                new TestPojoEqualsAndHashCode(aClass, excludeMethods).testClass();
+            }
         } else if (packageName != null) {
             final Set<Class<?>> classes = ManualClassFinder.findAllClassesUsingClassLoader(packageName);
             classes.forEach(aClass -> new TestPojoEqualsAndHashCode(aClass, excludeMethods).testClass());
@@ -70,10 +76,24 @@ public class TestPojo {
 
     public TestPojo testToString() {
         if (clazz != null) {
-            new TestPojoToString(clazz, excludeMethods).testClass();
+            for (final Class<?> aClass : clazz) {
+                new TestPojoToString(aClass, excludeMethods).testClass();
+            }
         } else if (packageName != null) {
             final Set<Class<?>> classes = ManualClassFinder.findAllClassesUsingClassLoader(packageName);
             classes.forEach(aClass -> new TestPojoToString(aClass, excludeMethods).testClass());
+        }
+        return this;
+    }
+
+    public TestPojo testConstructor() {
+        if (clazz != null) {
+            for (final Class<?> aClass : clazz) {
+                new TestPojoConstructor(aClass, excludeMethods).testClass();
+            }
+        } else if (packageName != null) {
+            final Set<Class<?>> classes = ManualClassFinder.findAllClassesUsingClassLoader(packageName);
+            classes.forEach(aClass -> new TestPojoConstructor(aClass, excludeMethods).testClass());
         }
         return this;
     }
