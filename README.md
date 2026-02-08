@@ -459,6 +459,7 @@ For `hashCode()`:
 
 - All public methods can be invoked with random data arguments when required
 - Random data can be used for all parameter types
+- All public methods exposed by class are invoked using random data
 
 ## Requirements
 
