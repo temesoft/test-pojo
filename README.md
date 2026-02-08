@@ -586,70 +586,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * the freedom to share the software with your friends and neighbors
 * the freedom to share the changes you make.
 
-## Changelog
-
-### Version 1.0.0
-
-- Initial release
-- Support for getters/setters testing
-- Equals/hashCode validation
-- ToString consistency checking
-- Constructor testing
-- Package-level scanning
-- Method exclusion capabilities
-
 ## Acknowledgments
 
 - [Instancio](https://www.instancio.org/) for excellent random data generation
-- Inspired by the need to reduce POJO testing boilerplate
 
 ## Support
 
 - 📚 [Documentation](https://javadoc.io/doc/io.github.temesoft/test-pojo)
 - 🐛 [Issue Tracker](https://github.com/temesoft/test-pojo/issues)
-- 💬 [Discussions](https://github.com/temesoft/test-pojo/discussions)
-
----
-
-**Made with ❤️ by the test-pojo team**
-
-
---------
-
-# TODO:
-
-### Add
-
-- Test with inheritance hierarchies
-- Test with abstract classes
-- Test with interfaces
-- Test with records (Java 14+)
-- Test with enums
-
-### Consider Adding
-
-1. **Custom assertion messages** - Allow users to provide custom error messages
-2. **Reporting** - Generate a report of what was tested
-3. **Parallel execution** - Test multiple classes in parallel
-4. **Configuration object** - Instead of many exclude methods, use a config object
-5. **Support for Lombok** - Special handling for @Data, @Getter, @Setter annotations
-
-### Example configuration approach:
-
-```java
-TestPojoConfig config = TestPojoConfig.builder()
-        .excludeMethods("getClass", "wait", "notify")
-        .strictMode(true)
-        .parallelExecution(true)
-        .build();
-
-TestPojo.
-
-processPackage("com.example.models")
-    .
-
-withConfig(config)
-    .
-
-testAll();
-```
