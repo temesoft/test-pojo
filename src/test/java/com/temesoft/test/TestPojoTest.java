@@ -5,14 +5,13 @@ import com.temesoft.test.exception.TestPojoEqualsException;
 import com.temesoft.test.exception.TestPojoHashCodeException;
 import com.temesoft.test.exception.TestPojoSetterGetterException;
 import com.temesoft.test.exception.TestPojoToStringException;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class TestPojoTest {
 
     @Test
     public void testRandomProcessClass_Pojo() {
         TestPojo.processClass(Pojo1.class)
-                .excludeMethodsContaining("Pojo1.getKey()")
                 .testRandom()
                 .testSettersGetters()
                 .testEqualsAndHashCode()
@@ -51,18 +50,6 @@ public class TestPojoTest {
                 .testConstructor()
                 .testToString()
                 .testRandom();
-    }
-
-    @Test
-    public void testRandomProcessClass_Record() {
-        TestPojo.processClass(RecordClass.class)
-                .testRandom()
-                .testSettersGetters()
-                .testEqualsAndHashCode()
-                .testToString();
-    }
-
-    public record RecordClass(String key, Double value, boolean ready) {
     }
 
     static class Pojo1 {
