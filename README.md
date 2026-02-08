@@ -42,7 +42,7 @@ Writing comprehensive tests for POJOs is tedious and repetitive. **test-pojo** a
 
 ```java
 import com.temesoft.test.TestPojo;
-import org.junit.Test;
+import org.junit.Test; // or use JUnit 5 (Jupiter) org.junit.jupiter.api.Test
 
 public class MyPojoTest {
 
@@ -414,34 +414,6 @@ public void comprehensiveUserTest() {
             .testSettersGetters()
             .testEqualsAndHashCode()
             .testToString();
-}
-```
-
-### Testing with JUnit 5
-
-Works perfectly with JUnit 5:
-
-```java
-import org.junit.jupiter.api.Test;
-import com.temesoft.test.TestPojo;
-
-class UserTest {
-
-    @Test
-    void shouldValidateUserPojo() {
-        TestPojo.processClass(User.class)
-                .testSettersGetters()
-                .testEqualsAndHashCode()
-                .testToString();
-    }
-
-    @Test
-    void shouldValidateAllModelClasses() {
-        TestPojo.processPackage("com.myapp.model")
-                .excludeMethodsContaining("getClass")
-                .testSettersGetters()
-                .testEqualsAndHashCode();
-    }
 }
 ```
 
