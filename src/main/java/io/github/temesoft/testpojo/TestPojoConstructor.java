@@ -1,16 +1,15 @@
-package com.temesoft.test;
+package io.github.temesoft.testpojo;
 
-import com.temesoft.test.exception.TestPojoConstructorException;
+import io.github.temesoft.testpojo.exception.TestPojoConstructorException;
 import org.instancio.Instancio;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class TestPojoConstructor {
+final class TestPojoConstructor {
 
     final Class<?> clazz;
     final Collection<String> excludeMethods;
@@ -35,12 +34,8 @@ public class TestPojoConstructor {
             }
             try {
                 final Object unused = constructor.newInstance(arguments.toArray(new Object[0]));
-            } catch (InstantiationException e) {
-                throw new TestPojoConstructorException(constructor, "Instantiation exception: " + e.getMessage());
-            } catch (IllegalAccessException e) {
-                throw new TestPojoConstructorException(constructor, "Illegal access exception: " + e.getMessage());
-            } catch (InvocationTargetException e) {
-                throw new TestPojoConstructorException(constructor, "Invocation target exception: " + e.getMessage());
+            } catch (Exception e) {
+                throw new TestPojoConstructorException(constructor, "Constructor instantiation exception: " + e.getMessage());
             }
         }
     }

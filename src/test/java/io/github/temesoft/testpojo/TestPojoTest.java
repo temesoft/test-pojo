@@ -1,11 +1,13 @@
-package com.temesoft.test;
+package io.github.temesoft.testpojo;
 
-import com.temesoft.test.exception.TestPojoConstructorException;
-import com.temesoft.test.exception.TestPojoEqualsException;
-import com.temesoft.test.exception.TestPojoHashCodeException;
-import com.temesoft.test.exception.TestPojoSetterGetterException;
-import com.temesoft.test.exception.TestPojoToStringException;
+import io.github.temesoft.testpojo.exception.TestPojoConstructorException;
+import io.github.temesoft.testpojo.exception.TestPojoEqualsException;
+import io.github.temesoft.testpojo.exception.TestPojoHashCodeException;
+import io.github.temesoft.testpojo.exception.TestPojoSetterGetterException;
+import io.github.temesoft.testpojo.exception.TestPojoToStringException;
 import org.junit.Test;
+
+import java.util.List;
 
 public class TestPojoTest {
 
@@ -16,6 +18,22 @@ public class TestPojoTest {
                 .testSettersGetters()
                 .testEqualsAndHashCode()
                 .testToString();
+    }
+
+    @Test
+    public void testRandomProcessClass_PojoExcludeSingleMethod() {
+        TestPojo.processClass(Pojo1.class)
+                .excludeMethodContaining("Pojo1.printValue")
+                .testRandom()
+                .testSettersGetters()
+                .testEqualsAndHashCode()
+                .testToString();
+    }
+
+    @Test
+    public void testRandomProcessClass_TestAll() {
+        TestPojo.processClass(Pojo1.class)
+                .testAll();
     }
 
     @Test
@@ -30,8 +48,13 @@ public class TestPojoTest {
 
     @Test
     public void testRandomProcessPackage() {
-        TestPojo.processPackage("com.temesoft.test")
-                .excludeMethodsContaining("TestPojoTest.")
+        TestPojo.processPackage("io.github.temesoft.testpojo")
+                .excludeMethodsContaining(List.of(
+                        "TestPojoTest.",
+                        "TestPojoEqualsAndHashCodeTest.",
+                        "TestPojoToStringTest.",
+                        "Pojo_Bad"
+                ))
                 .testRandom()
                 .testSettersGetters()
                 .testEqualsAndHashCode()

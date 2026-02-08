@@ -1,4 +1,4 @@
-package com.temesoft.test.exception;
+package io.github.temesoft.testpojo.exception;
 
 import java.lang.reflect.Method;
 

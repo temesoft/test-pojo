@@ -1,4 +1,4 @@
-package com.temesoft.test;
+package io.github.temesoft.testpojo;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

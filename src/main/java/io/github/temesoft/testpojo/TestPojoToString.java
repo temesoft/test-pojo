@@ -1,15 +1,15 @@
-package com.temesoft.test;
+package io.github.temesoft.testpojo;
 
-import com.temesoft.test.exception.TestPojoToStringException;
+import io.github.temesoft.testpojo.exception.TestPojoToStringException;
 import org.instancio.Instancio;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import static com.temesoft.test.TestPojoUtils.isMethodExcluded;
+import static io.github.temesoft.testpojo.TestPojoUtils.isMethodExcluded;
 
-public class TestPojoToString {
+final class TestPojoToString {
 
     final Class<?> clazz;
     final Collection<String> excludeMethods;

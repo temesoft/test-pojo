@@ -1,14 +1,14 @@
-package com.temesoft.test;
+package io.github.temesoft.testpojo;
 
-import com.temesoft.test.exception.TestPojoEqualsException;
-import com.temesoft.test.exception.TestPojoHashCodeException;
+import io.github.temesoft.testpojo.exception.TestPojoEqualsException;
+import io.github.temesoft.testpojo.exception.TestPojoHashCodeException;
 import org.instancio.Instancio;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import static com.temesoft.test.TestPojoUtils.isMethodExcluded;
+import static io.github.temesoft.testpojo.TestPojoUtils.isMethodExcluded;
 
 final class TestPojoEqualsAndHashCode {
 

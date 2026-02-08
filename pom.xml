@@ -3,23 +3,28 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.temesoft.test</groupId>
+    <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
+    <version>1.0.1</version>
     <name>test-pojo</name>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.release>11</maven.compiler.release>
 
         <!-- plugin versions -->
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <error-prone.version>2.31.0</error-prone.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <jacoco-badge-maven-plugin.version>0.1.4</jacoco-badge-maven-plugin.version>
         <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
@@ -87,7 +92,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
+                                            <minimum>0.9080</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -175,33 +180,17 @@
                 <version>3.15.0</version>
                 <configuration>
                     <fork>true</fork>
-                    <source>11</source>
-                    <target>11</target>
+                    <release>11</release>
                     <encoding>UTF-8</encoding>
-                    <compilerArgs>
-                        <arg>-XDcompilePolicy=simple</arg>
-                        <arg>--should-stop=ifError=FLOW</arg>
-                        <arg>-Xplugin:ErrorProne</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-                    </compilerArgs>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>com.google.errorprone</groupId>
-                            <artifactId>error_prone_core</artifactId>
-                            <version>${error-prone.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <scm>
+        <connection>scm:git:git@github.com:temesoft/test-pojo.git</connection>
+        <developerConnection>scm:git:git@github.com:temesoft/test-pojo.git</developerConnection>
+        <url>https://github.com/temesoft/test-pojo</url>
+        <tag>HEAD</tag>
+    </scm>
 </project>

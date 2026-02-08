@@ -1,16 +1,15 @@
-package com.temesoft.test;
+package io.github.temesoft.testpojo;
 
-import com.temesoft.test.exception.TestPojoSetterGetterException;
+import io.github.temesoft.testpojo.exception.TestPojoSetterGetterException;
 import org.instancio.Instancio;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import static com.temesoft.test.TestPojoUtils.getGetterMethodWithNameAndReturnType;
-import static com.temesoft.test.TestPojoUtils.getSetterMethodWithNameAndArgumentType;
-import static com.temesoft.test.TestPojoUtils.isMethodExcluded;
+import static io.github.temesoft.testpojo.TestPojoUtils.getGetterMethodWithNameAndReturnType;
+import static io.github.temesoft.testpojo.TestPojoUtils.getSetterMethodWithNameAndArgumentType;
+import static io.github.temesoft.testpojo.TestPojoUtils.isMethodExcluded;
 
 final class TestPojoSetterGetter {
 
@@ -58,10 +57,8 @@ final class TestPojoSetterGetter {
                     if (result == null || !result.equals(value)) {
                         throw new TestPojoSetterGetterException(setterMethodFound, getterMethodFound, value, result);
                     }
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Illegal access exception", e);
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException("Invocation target exception", e);
+                } catch (Exception e) {
+                    throw new RuntimeException("Method invocation exception: " + e.getMessage(), e);
                 }
             }
         }

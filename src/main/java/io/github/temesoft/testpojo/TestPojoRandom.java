@@ -1,8 +1,7 @@
-package com.temesoft.test;
+package io.github.temesoft.testpojo;
 
 import org.instancio.Instancio;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -41,10 +40,8 @@ final class TestPojoRandom {
                 }
                 try {
                     final Object unused = method.invoke(object, invokeParameters.toArray(new Object[0]));
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Illegal access exception; method: " + method, e);
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException("Invocation target exception; method: " + method, e);
+                } catch (Exception e) {
+                    throw new RuntimeException("Method invocation exception: " + e.getMessage(), e);
                 }
             }
         }
