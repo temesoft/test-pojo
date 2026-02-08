@@ -577,18 +577,14 @@ If `processPackage()` doesn't find classes:
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to
 discuss what you would like to change.
 
-### Development Setup
-
-```bash
-git clone https://github.com/temesoft/test-pojo.git
-cd test-pojo
-mvn clean install
-mvn test
-```
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+* the freedom to use the software for any purpose,
+* the freedom to change the software to suit your needs,
+* the freedom to share the software with your friends and neighbors
+* the freedom to share the changes you make.
 
 ## Changelog
 
