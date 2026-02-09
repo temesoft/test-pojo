@@ -21,7 +21,7 @@ Writing comprehensive tests for POJOs is tedious and repetitive. **test-pojo** a
 - **Fluent API** for readable test code
 - **Minimal dependencies** - just Instancio for random data generation
 - **Wide JDK support** - Support JDK 11, 17, 21, 25
-- **Slf4j logging** debug/trace level logging
+- **Slf4j logging** debug and trace level logging
 
 ## Table of Contents
 
@@ -68,7 +68,7 @@ That's it! This will comprehensively test your POJO's getters, setters, equals, 
 <dependency>
     <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -76,7 +76,7 @@ That's it! This will comprehensively test your POJO's getters, setters, equals, 
 ### Gradle
 
 ```gradle
-testImplementation 'io.github.temesoft:test-pojo:1.0.1'
+testImplementation 'io.github.temesoft:test-pojo:1.0.2'
 ```
 
 ## Usage

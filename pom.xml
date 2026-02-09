@@ -5,7 +5,7 @@
 
     <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>test-pojo</name>
     <description>test-pojo is a lightweight Java testing library that automatically validates your Plain Old Java Objects (POJOs). It uses reflection and the Instancio library to thoroughly test all public methods, getters, setters, equals(), hashCode(), toString(), and constructors with minimal boilerplate code.</description>
     <url>https://github.com/temesoft/test-pojo</url>
