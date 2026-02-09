@@ -103,6 +103,7 @@ final class TestPojoEqualsAndHashCode {
                     && method.getParameters()[0].getType().equals(Object.class)
                     && !isMethodExcluded(method, excludeMethods)) {
                 try {
+                    LOGGER.trace("Method: {}", method);
                     boolean response = (boolean) method.invoke(objectRandom1, (Object) null);
                     if (response) {
                         throw new TestPojoEqualsException(
@@ -140,6 +141,7 @@ final class TestPojoEqualsAndHashCode {
                     && method.getReturnType().equals(int.class)
                     && method.getParameterCount() == 0
                     && !isMethodExcluded(method, excludeMethods)) {
+                LOGGER.trace("Method: {}", method);
                 try {
                     final int response1 = (int) method.invoke(objectRandom1);
                     final int response2 = (int) method.invoke(objectRandom2);

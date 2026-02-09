@@ -6,7 +6,7 @@
     </appender>
 
     <logger name="org.instancio.internal" level="ERROR"/>
-    <logger name="io.github.temesoft.testpojo" level="DEBUG"/>
+    <logger name="io.github.temesoft.testpojo" level="TRACE"/>
 
     <root level="${root.log.level:-ERROR}">
         <appender-ref ref="STDOUT"/>

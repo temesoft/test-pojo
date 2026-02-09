@@ -3,13 +3,11 @@ package io.github.temesoft.testpojo.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
 @Builder
 @SuppressWarnings("unused")
@@ -19,6 +17,7 @@ public class PojoComplex1 {
     private boolean ready;
     private List<String> tokens;
     private Map<String, Object> headers;
+    private Pojo1 pojo1;
 
     public static String getSomething() {
         return "testing";

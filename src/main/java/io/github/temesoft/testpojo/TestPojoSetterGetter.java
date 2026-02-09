@@ -209,6 +209,7 @@ final class TestPojoSetterGetter {
                     try {
                         setterMethodFound.invoke(object, value);
                         final Object result = getterMethodFound.invoke(object);
+                        LOGGER.trace("Result value: {}", result);
                         if (result == null || !result.equals(value)) {
                             throw new TestPojoSetterGetterException(
                                     setterMethodFound,

@@ -16,11 +16,12 @@ Writing comprehensive tests for POJOs is tedious and repetitive. **test-pojo** a
 - **Automatic validation** of getters and setters
 - **Equals/HashCode contract** verification
 - **ToString consistency** checking
-- **Constructor testing** with random data
+- **Constructor testing** with random data 
 - **Package-level scanning** to test multiple classes at once
 - **Fluent API** for readable test code
 - **Minimal dependencies** - just Instancio for random data generation
 - **Wide JDK support** - Support JDK 11, 17, 21, 25
+- **Slf4j logging** debug/trace level logging
 
 ## Table of Contents
 

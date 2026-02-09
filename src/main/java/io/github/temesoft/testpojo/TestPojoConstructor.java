@@ -76,6 +76,7 @@ final class TestPojoConstructor {
         LOGGER.debug("Running constructor test for: {}", clazz.getName());
         final Constructor<?>[] constructors = clazz.getConstructors();
         for (final Constructor<?> constructor : constructors) {
+            LOGGER.trace("Constructor: {}", constructor);
             final List<Object> arguments = new ArrayList<>();
             final Parameter[] parameters = constructor.getParameters();
             for (final Parameter parameter : parameters) {
@@ -105,6 +106,7 @@ final class TestPojoConstructor {
                 }
             }
             try {
+                LOGGER.trace("Arguments: {}", arguments);
                 final Object unused = constructor.newInstance(arguments.toArray(new Object[0]));
             } catch (Exception e) {
                 throw new TestPojoConstructorException(constructor, "Constructor instantiation exception: " + e.getMessage());

@@ -113,7 +113,9 @@ final class TestPojoRandom {
                     && !method.toString().contains("java.lang.Object.wait(long,int)")
                     && !method.toString().contains("java.lang.Throwable.printStackTrace(java.io.PrintWriter)")
                     && !method.toString().contains("java.lang.Throwable.initCause(java.lang.Throwable)")
+                    && !method.toString().contains(".build()")
                     && TestPojoUtils.canAccess(method, object)) {
+                LOGGER.trace("Method: {}", method);
                 final List<Object> invokeParameters = new ArrayList<>();
                 final Parameter[] parameters = method.getParameters();
                 for (final Parameter parameter : parameters) {
@@ -137,6 +139,7 @@ final class TestPojoRandom {
                     invokeParameters.add(parameterValue);
                 }
                 try {
+                    LOGGER.trace("Arguments: {}", invokeParameters);
                     final Object unused = method.invoke(object, invokeParameters.toArray(new Object[0]));
                 } catch (Exception e) {
                     throw new RuntimeException("Method invocation exception: " + e.getMessage(), e);

@@ -101,9 +101,11 @@ final class TestPojoToString {
         final Method[] methods = clazz.getMethods();
         for (final Method method : methods) {
             if (method.getName().equals("toString")
+                    && !method.toString().contains("java.lang.Object.toString()")
                     && method.getReturnType().equals(String.class)
                     && method.getParameterCount() == 0
                     && !isMethodExcluded(method, excludeMethods)) {
+                LOGGER.trace("Method: {}", method);
                 try {
                     final String response = (String) method.invoke(objectRandom);
                     final String responseRepeat = (String) method.invoke(objectRandom);
