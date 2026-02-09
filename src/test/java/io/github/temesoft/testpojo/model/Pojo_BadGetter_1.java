@@ -1,5 +1,6 @@
 package io.github.temesoft.testpojo.model;
 
+@SuppressWarnings("unused")
 public class Pojo_BadGetter_1 {
     private String key;
 

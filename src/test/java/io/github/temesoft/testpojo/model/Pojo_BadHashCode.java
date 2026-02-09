@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.Objects;
 
 @Data
+@SuppressWarnings("EqualsGetClass")
 public class Pojo_BadHashCode {
     private String value;
 
