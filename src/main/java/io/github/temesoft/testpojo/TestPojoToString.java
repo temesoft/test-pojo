@@ -2,37 +2,118 @@ package io.github.temesoft.testpojo;
 
 import io.github.temesoft.testpojo.exception.TestPojoToStringException;
 import org.instancio.Instancio;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 
 import static io.github.temesoft.testpojo.TestPojoUtils.isMethodExcluded;
 
+/**
+ * Internal utility class responsible for testing the correctness and consistency of
+ * {@code toString()} method implementations in a given class.
+ * <p>
+ * This class verifies that {@code toString()} methods conform to the general contract
+ * defined in {@link Object#toString()}, specifically testing for consistency - that
+ * multiple invocations of {@code toString()} on the same unchanged object return equal
+ * string representations. It uses reflection to discover and invoke the {@code toString()}
+ * method with randomly generated test data from the Instancio library.
+ * </p>
+ * <p>
+ * This class is package-private and intended for internal use only within the test-pojo framework.
+ * Abstract classes are skipped as they cannot be instantiated.
+ * </p>
+ */
 final class TestPojoToString {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestPojoToString.class);
 
     final Class<?> clazz;
     final Collection<String> excludeMethods;
 
+    /**
+     * Constructs a new {@code TestPojoToString} for testing the {@code toString()} method
+     * of the specified class.
+     *
+     * @param clazz          the class whose {@code toString()} method will be tested, must not be null
+     * @param excludeMethods collection of method names to exclude from testing, may be empty but not null
+     */
     TestPojoToString(final Class<?> clazz,
                      final Collection<String> excludeMethods) {
         this.clazz = clazz;
         this.excludeMethods = excludeMethods;
     }
 
+    /**
+     * Tests the {@code toString()} method of the target class for consistency.
+     * <p>
+     * This method performs the following steps:
+     * </p>
+     * <ol>
+     *   <li>Skips testing if the target class is abstract</li>
+     *   <li>Creates a random instance of the class using Instancio</li>
+     *   <li>Locates the {@code toString()} method</li>
+     *   <li>Invokes {@code toString()} twice on the same unchanged object</li>
+     *   <li>Verifies that both invocations return equal string values</li>
+     * </ol>
+     *
+     * <h3>Method signature requirements:</h3>
+     * <p>
+     * Only methods matching the exact {@code toString()} signature are tested:
+     * </p>
+     * <ul>
+     *   <li>Method name must be "toString"</li>
+     *   <li>Return type must be {@link String}</li>
+     *   <li>Must have zero parameters</li>
+     *   <li>Must not be in the excluded methods collection</li>
+     * </ul>
+     *
+     * <h3>Consistency validation:</h3>
+     * <p>
+     * The test verifies that calling {@code toString()} multiple times on the same object
+     * without any state changes produces equal results, as determined by
+     * {@link String#equals(Object)}. This ensures that:
+     * </p>
+     * <ul>
+     *   <li>The {@code toString()} implementation is deterministic</li>
+     *   <li>The method does not modify object state (no side effects)</li>
+     *   <li>The method does not depend on external mutable state or random values</li>
+     *   <li>The string representation is stable for unchanged objects</li>
+     * </ul>
+     *
+     * @throws TestPojoToStringException if the {@code toString()} method violates the
+     *                                   consistency contract by returning different values when invoked multiple times
+     *                                   on the same unchanged object. This typically indicates that the implementation
+     *                                   includes random values, timestamps, or other non-deterministic elements.
+     * @throws RuntimeException          if reflection operations fail due to {@link IllegalAccessException}
+     *                                   or {@link InvocationTargetException}, wrapping the underlying exception with a
+     *                                   descriptive message
+     */
     void testClass() {
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            return;
+        }
+        LOGGER.debug("Running toString() test for: {}", clazz.getName());
         final Object objectRandom = Instancio.create(clazz);
         final Method[] methods = clazz.getMethods();
         for (final Method method : methods) {
             if (method.getName().equals("toString")
+                    && !method.toString().contains("java.lang.Object.toString()")
                     && method.getReturnType().equals(String.class)
                     && method.getParameterCount() == 0
                     && !isMethodExcluded(method, excludeMethods)) {
+                LOGGER.trace("Method: {}", method);
                 try {
                     final String response = (String) method.invoke(objectRandom);
                     final String responseRepeat = (String) method.invoke(objectRandom);
                     if (!responseRepeat.equals(response)) {
-                        throw new TestPojoToStringException(method, "Same unchanged object should return same toString() value every time");
+                        throw new TestPojoToStringException(
+                                method,
+                                "Same unchanged object should return same toString() value every time"
+                        );
                     }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Illegal access exception", e);

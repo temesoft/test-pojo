@@ -16,11 +16,12 @@ Writing comprehensive tests for POJOs is tedious and repetitive. **test-pojo** a
 - **Automatic validation** of getters and setters
 - **Equals/HashCode contract** verification
 - **ToString consistency** checking
-- **Constructor testing** with random data
+- **Constructor testing** with random data 
 - **Package-level scanning** to test multiple classes at once
 - **Fluent API** for readable test code
 - **Minimal dependencies** - just Instancio for random data generation
 - **Wide JDK support** - Support JDK 11, 17, 21, 25
+- **Slf4j logging** debug and trace level logging
 
 ## Table of Contents
 
@@ -67,7 +68,7 @@ That's it! This will comprehensively test your POJO's getters, setters, equals, 
 <dependency>
     <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -75,7 +76,7 @@ That's it! This will comprehensively test your POJO's getters, setters, equals, 
 ### Gradle
 
 ```gradle
-testImplementation 'io.github.temesoft:test-pojo:1.0.1'
+testImplementation 'io.github.temesoft:test-pojo:1.0.2'
 ```
 
 ## Usage
@@ -565,5 +566,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📚 [Documentation](https://javadoc.io/doc/io.github.temesoft/test-pojo)
-- 🐛 [Issue Tracker](https://github.com/temesoft/test-pojo/issues)
+- [Documentation](https://javadoc.io/doc/io.github.temesoft/test-pojo)
+- [Issue Tracker](https://github.com/temesoft/test-pojo/issues)

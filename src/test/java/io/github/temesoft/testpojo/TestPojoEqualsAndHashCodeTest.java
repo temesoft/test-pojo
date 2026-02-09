@@ -1,14 +1,17 @@
 package io.github.temesoft.testpojo;
 
 import io.github.temesoft.testpojo.exception.TestPojoEqualsException;
+import io.github.temesoft.testpojo.exception.TestPojoHashCodeException;
+import io.github.temesoft.testpojo.model.Pojo_BadEquals_1;
+import io.github.temesoft.testpojo.model.Pojo_BadEquals_2;
+import io.github.temesoft.testpojo.model.Pojo_BadEquals_3;
+import io.github.temesoft.testpojo.model.Pojo_BadEquals_4;
+import io.github.temesoft.testpojo.model.Pojo_BadHashCode;
 import org.junit.Test;
-
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-@SuppressWarnings("EqualsGetClass")
 public class TestPojoEqualsAndHashCodeTest {
 
     @Test
@@ -20,7 +23,7 @@ public class TestPojoEqualsAndHashCodeTest {
         );
         assertEquals("Equals method assertion error:\n" +
                         "\tError: Equals should not return true when null is passed as argument\n" +
-                        "\tMethod: public boolean io.github.temesoft.testpojo.TestPojoEqualsAndHashCodeTest$Pojo_BadEquals_1.equals(java.lang.Object)",
+                        "\tMethod: public boolean io.github.temesoft.testpojo.model.Pojo_BadEquals_1.equals(java.lang.Object)",
                 thrown.getMessage());
     }
 
@@ -33,7 +36,7 @@ public class TestPojoEqualsAndHashCodeTest {
         );
         assertEquals("Equals method assertion error:\n" +
                         "\tError: Equals should not return true when object of different type is passed as argument\n" +
-                        "\tMethod: public boolean io.github.temesoft.testpojo.TestPojoEqualsAndHashCodeTest$Pojo_BadEquals_2.equals(java.lang.Object)",
+                        "\tMethod: public boolean io.github.temesoft.testpojo.model.Pojo_BadEquals_2.equals(java.lang.Object)",
                 thrown.getMessage());
     }
 
@@ -46,7 +49,7 @@ public class TestPojoEqualsAndHashCodeTest {
         );
         assertEquals("Equals method assertion error:\n" +
                         "\tError: Two objects with random attributes should not equal\n" +
-                        "\tMethod: public boolean io.github.temesoft.testpojo.TestPojoEqualsAndHashCodeTest$Pojo_BadEquals_3.equals(java.lang.Object)",
+                        "\tMethod: public boolean io.github.temesoft.testpojo.model.Pojo_BadEquals_3.equals(java.lang.Object)",
                 thrown.getMessage());
     }
 
@@ -59,73 +62,20 @@ public class TestPojoEqualsAndHashCodeTest {
         );
         assertEquals("Equals method assertion error:\n" +
                         "\tError: Same object should be equal\n" +
-                        "\tMethod: public boolean io.github.temesoft.testpojo.TestPojoEqualsAndHashCodeTest$Pojo_BadEquals_4.equals(java.lang.Object)",
+                        "\tMethod: public boolean io.github.temesoft.testpojo.model.Pojo_BadEquals_4.equals(java.lang.Object)",
                 thrown.getMessage());
     }
 
-    static class Pojo_BadEquals_1 {
-        private String value;
-
-        @Override
-        public boolean equals(final Object o) {
-            return o == null;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(value);
-        }
+    @Test
+    public void testObjectsWithDifferentAttributesShouldReturnDifferentHashCode() {
+        final TestPojoEqualsAndHashCode testPojo = new TestPojoEqualsAndHashCode(Pojo_BadHashCode.class, null);
+        final TestPojoHashCodeException thrown = assertThrows(
+                TestPojoHashCodeException.class,
+                testPojo::testClass
+        );
+        assertEquals("HashCode method assertion error:\n" +
+                        "\tError: Two objects with different attributes should return different hashCode value\n" +
+                        "\tMethod: public int io.github.temesoft.testpojo.model.Pojo_BadHashCode.hashCode()",
+                thrown.getMessage());
     }
-
-    static class Pojo_BadEquals_2 {
-        private String value;
-
-        @Override
-        public boolean equals(final Object o) {
-            if (o == null) return false;
-            if (getClass() != o.getClass()) return true;
-            final Pojo_BadEquals_2 that = (Pojo_BadEquals_2) o;
-            return Objects.equals(value, that.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(value);
-        }
-    }
-
-    static class Pojo_BadEquals_3 {
-        private String value;
-
-        @Override
-        public boolean equals(final Object o) {
-            return o != null && getClass() == o.getClass();
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(value);
-        }
-    }
-
-    static class Pojo_BadEquals_4 {
-        private String value;
-
-        @Override
-        public boolean equals(final Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            final Pojo_BadEquals_4 that = (Pojo_BadEquals_4) o;
-            if (!value.equals(that.value)) {
-                return false;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(value);
-        }
-    }
-
 }
