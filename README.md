@@ -565,5 +565,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📚 [Documentation](https://javadoc.io/doc/io.github.temesoft/test-pojo)
-- 🐛 [Issue Tracker](https://github.com/temesoft/test-pojo/issues)
+- [Documentation](https://javadoc.io/doc/io.github.temesoft/test-pojo)
+- [Issue Tracker](https://github.com/temesoft/test-pojo/issues)

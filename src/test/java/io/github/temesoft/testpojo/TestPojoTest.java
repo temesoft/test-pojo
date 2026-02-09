@@ -3,11 +3,20 @@ package io.github.temesoft.testpojo;
 import io.github.temesoft.testpojo.exception.TestPojoConstructorException;
 import io.github.temesoft.testpojo.exception.TestPojoEqualsException;
 import io.github.temesoft.testpojo.exception.TestPojoHashCodeException;
+import io.github.temesoft.testpojo.exception.TestPojoRawUseException;
 import io.github.temesoft.testpojo.exception.TestPojoSetterGetterException;
 import io.github.temesoft.testpojo.exception.TestPojoToStringException;
+import io.github.temesoft.testpojo.model.Pojo1;
+import io.github.temesoft.testpojo.model.PojoComplex1;
+import io.github.temesoft.testpojo.model.PojoExtendingAbstractBase;
+import io.github.temesoft.testpojo.model.PojoImmutable;
+import io.github.temesoft.testpojo.model.Pojo_BadRawUsageInSetter;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class TestPojoTest {
 
@@ -48,13 +57,8 @@ public class TestPojoTest {
 
     @Test
     public void testRandomProcessPackage() {
-        TestPojo.processPackage("io.github.temesoft.testpojo")
-                .excludeMethodsContaining(List.of(
-                        "TestPojoTest.",
-                        "TestPojoEqualsAndHashCodeTest.",
-                        "TestPojoToStringTest.",
-                        "Pojo_Bad"
-                ))
+        TestPojo.processPackage("io.github.temesoft.testpojo.model")
+                .excludeMethodsContaining(List.of("Pojo_Bad"))
                 .testRandom()
                 .testSettersGetters()
                 .testEqualsAndHashCode()
@@ -67,6 +71,7 @@ public class TestPojoTest {
                         TestPojoConstructorException.class,
                         TestPojoEqualsException.class,
                         TestPojoHashCodeException.class,
+                        TestPojoRawUseException.class,
                         TestPojoSetterGetterException.class,
                         TestPojoToStringException.class
                 )
@@ -75,65 +80,25 @@ public class TestPojoTest {
                 .testRandom();
     }
 
-    static class Pojo1 {
-        private String key;
-        private Double value;
-        private boolean ready;
-
-        public String printValue() {
-            return key + "=" + value;
-        }
-
-        public boolean isReady() {
-            return ready;
-        }
-
-        public void setReady(final boolean ready) {
-            this.ready = ready;
-        }
-
-        public void setValue(final Double value) {
-            this.value = value;
-        }
-
-        public void setKey(final String key) {
-            this.key = key;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public Double getValue() {
-            return value;
-        }
+    @Test
+    public void testRandomProcessClass_ComplexClassWithLombok() {
+        TestPojo.processClass(PojoComplex1.class).testAll();
     }
 
-    static class PojoImmutable {
-        private final String key;
-        private final Double value;
-        private final boolean ready;
+    @Test
+    public void testRandomProcessClass_PojoExtendingAbstractBase() {
+        TestPojo.processClass(PojoExtendingAbstractBase.class).testAll();
+    }
 
-        public PojoImmutable(final String key, final Double value, final boolean ready) {
-            this.key = key;
-            this.value = value;
-            this.ready = ready;
-        }
-
-        public String printValue() {
-            return key + "=" + value;
-        }
-
-        public boolean isReady() {
-            return ready;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public Double getValue() {
-            return value;
-        }
+    @Test
+    public void testRandomProcessClass_RawUsageInSetter() {
+        final TestPojoRawUseException thrown = assertThrows(
+                TestPojoRawUseException.class,
+                () -> TestPojo.processClass(Pojo_BadRawUsageInSetter.class).testRandom()
+        );
+        assertEquals("Raw use assertion error:\n" +
+                        "\tError: Raw use of parameterized class: java.util.Map\n" +
+                        "\tMethod: public void io.github.temesoft.testpojo.model.Pojo_BadRawUsageInSetter.setHeaders(java.util.Map)",
+                thrown.getMessage());
     }
 }

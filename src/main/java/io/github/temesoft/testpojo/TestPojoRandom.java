@@ -1,25 +1,107 @@
 package io.github.temesoft.testpojo;
 
+import io.github.temesoft.testpojo.exception.TestPojoRawUseException;
 import org.instancio.Instancio;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Internal utility class responsible for testing all accessible methods of a given class
+ * by invoking them with randomly generated parameters.
+ * <p>
+ * This class creates a random instance of the target class and systematically invokes all
+ * accessible public methods with automatically generated parameter values. The primary goal
+ * is to verify that methods can be invoked without throwing unexpected exceptions when called
+ * with valid random data. This helps identify potential runtime issues, null pointer exceptions,
+ * or other method implementation problems.
+ * </p>
+ * <p>
+ * This class is package-private and intended for internal use only within the test-pojo framework.
+ * Abstract classes are skipped as they cannot be instantiated.
+ * </p>
+ */
 final class TestPojoRandom {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestPojoRandom.class);
 
     final Class<?> clazz;
     final Collection<String> excludeMethods;
 
+    /**
+     * Constructs a new {@code TestPojoRandom} for testing the methods of the specified class
+     * with random parameter values.
+     *
+     * @param clazz          the class whose methods will be tested, must not be null
+     * @param excludeMethods collection of method names to exclude from testing, may be empty but not null
+     */
     TestPojoRandom(final Class<?> clazz,
                    final Collection<String> excludeMethods) {
         this.clazz = clazz;
         this.excludeMethods = excludeMethods;
     }
 
+    /**
+     * Tests all accessible public methods of the target class by invoking them with randomly
+     * generated parameter values.
+     * <p>
+     * This method performs the following steps:
+     * </p>
+     * <ol>
+     *   <li>Skips testing if the target class is abstract</li>
+     *   <li>Creates a random instance of the class using Instancio</li>
+     *   <li>Iterates through all public methods of the class</li>
+     *   <li>For each eligible method, generates random parameter values</li>
+     *   <li>Invokes the method with the generated parameters</li>
+     * </ol>
+     *
+     * <h3>Methods excluded from testing:</h3>
+     * <ul>
+     *   <li>Methods in the {@code excludeMethods} collection</li>
+     *   <li>Methods that are not accessible from the current context</li>
+     *   <li>Core {@link Object} methods that may cause issues:
+     *     <ul>
+     *       <li>{@link Object#notify()}</li>
+     *       <li>{@link Object#notifyAll()}</li>
+     *       <li>{@link Object#wait()}, {@link Object#wait(long)}, {@link Object#wait(long, int)}</li>
+     *     </ul>
+     *   </li>
+     *   <li>Problematic {@link Throwable} methods:
+     *     <ul>
+     *       <li>{@link Throwable#printStackTrace(java.io.PrintWriter)}</li>
+     *       <li>{@link Throwable#initCause(Throwable)}</li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     *
+     * <h3>Parameter generation:</h3>
+     * <ul>
+     *   <li>For {@link Collection} and {@link Map} parameters with generic type information:
+     *       creates instances with proper type parameters using Instancio</li>
+     *   <li>For other parameter types: creates random instances using Instancio</li>
+     *   <li>Handles parameterized types by extracting and applying generic type arguments</li>
+     * </ul>
+     *
+     * @throws TestPojoRawUseException if a {@link Collection} or {@link Map} parameter is encountered
+     *                                 without generic type parameters (raw type usage), as this prevents proper test data generation
+     * @throws RuntimeException        if any method invocation fails, wrapping the underlying exception
+     *                                 with a descriptive message. This typically indicates a bug in the method implementation
+     *                                 or an issue with the generated test data.
+     */
     void testClass() {
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            return;
+        }
+        LOGGER.debug("Running random instantiation test for: {}", clazz.getName());
         final Object object = Instancio.create(clazz);
         final Method[] methods = object.getClass().getMethods();
         for (final Method method : methods) {
@@ -31,11 +113,27 @@ final class TestPojoRandom {
                     && !method.toString().contains("java.lang.Object.wait(long,int)")
                     && !method.toString().contains("java.lang.Throwable.printStackTrace(java.io.PrintWriter)")
                     && !method.toString().contains("java.lang.Throwable.initCause(java.lang.Throwable)")
-                    && method.canAccess(object)) {
+                    && TestPojoUtils.canAccess(method, object)) {
                 final List<Object> invokeParameters = new ArrayList<>();
                 final Parameter[] parameters = method.getParameters();
                 for (final Parameter parameter : parameters) {
-                    final Object parameterValue = Instancio.create(parameter.getType());
+                    final Object parameterValue;
+                    if (Collection.class.isAssignableFrom(parameter.getType())
+                            || Map.class.isAssignableFrom(parameter.getType())) {
+                        final Type genericType = parameter.getParameterizedType();
+                        if (genericType instanceof ParameterizedType) {
+                            final ParameterizedType pType = (ParameterizedType) genericType;
+                            final Type[] typeArguments = pType.getActualTypeArguments();
+                            final Class<?>[] typeParameters = TestPojoUtils.typesToClasses(typeArguments);
+                            parameterValue = Instancio.of(parameter.getType())
+                                    .withTypeParameters(typeParameters)
+                                    .create();
+                        } else {
+                            throw new TestPojoRawUseException(method, parameter.getType());
+                        }
+                    } else {
+                        parameterValue = Instancio.create(parameter.getType());
+                    }
                     invokeParameters.add(parameterValue);
                 }
                 try {
