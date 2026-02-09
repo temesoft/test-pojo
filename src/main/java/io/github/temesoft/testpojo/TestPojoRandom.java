@@ -68,19 +68,8 @@ final class TestPojoRandom {
      * <ul>
      *   <li>Methods in the {@code excludeMethods} collection</li>
      *   <li>Methods that are not accessible from the current context</li>
-     *   <li>Core {@link Object} methods that may cause issues:
-     *     <ul>
-     *       <li>{@link Object#notify()}</li>
-     *       <li>{@link Object#notifyAll()}</li>
-     *       <li>{@link Object#wait()}, {@link Object#wait(long)}, {@link Object#wait(long, int)}</li>
-     *     </ul>
-     *   </li>
-     *   <li>Problematic {@link Throwable} methods:
-     *     <ul>
-     *       <li>{@link Throwable#printStackTrace(java.io.PrintWriter)}</li>
-     *       <li>{@link Throwable#initCause(Throwable)}</li>
-     *     </ul>
-     *   </li>
+     *   <li>Core {@link Object} methods</li>
+     *   <li>Core {@link Throwable} methods</li>
      * </ul>
      *
      * <h3>Parameter generation:</h3>
@@ -106,13 +95,8 @@ final class TestPojoRandom {
         final Method[] methods = object.getClass().getMethods();
         for (final Method method : methods) {
             if (!TestPojoUtils.isMethodExcluded(method, excludeMethods)
-                    && !method.toString().contains("java.lang.Object.notify()")
-                    && !method.toString().contains("java.lang.Object.notifyAll()")
-                    && !method.toString().contains("java.lang.Object.wait(long)")
-                    && !method.toString().contains("java.lang.Object.wait()")
-                    && !method.toString().contains("java.lang.Object.wait(long,int)")
-                    && !method.toString().contains("java.lang.Throwable.printStackTrace(java.io.PrintWriter)")
-                    && !method.toString().contains("java.lang.Throwable.initCause(java.lang.Throwable)")
+                    && !method.getDeclaringClass().equals(Object.class)
+                    && !method.getDeclaringClass().equals(Throwable.class)
                     && !method.toString().contains(".build()")
                     && TestPojoUtils.canAccess(method, object)) {
                 LOGGER.trace("Method: {}", method);

@@ -35,9 +35,9 @@ public class TestPojoSetterGetterTest {
         );
         assertTrue(thrown.getMessage()
                 .contains("Setter/Getter assertion error:\n" +
-                "\tError: Getter return value does not correspond to Setter argument used\n" +
-                "\tSetter method: public void io.github.temesoft.testpojo.model.Pojo_BadGetter_1.setKey(java.lang.String)\n" +
-                "\tGetter method: public java.lang.String io.github.temesoft.testpojo.model.Pojo_BadGetter_1.getKey()\n")
+                        "\tError: Getter return value does not correspond to Setter argument used\n" +
+                        "\tSetter method: public void io.github.temesoft.testpojo.model.Pojo_BadGetter_1.setKey(java.lang.String)\n" +
+                        "\tGetter method: public java.lang.String io.github.temesoft.testpojo.model.Pojo_BadGetter_1.getKey()\n")
         );
         assertTrue(thrown.getMessage().contains("Actual result: key"));
     }
