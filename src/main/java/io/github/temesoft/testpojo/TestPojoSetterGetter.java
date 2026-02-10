@@ -53,8 +53,8 @@ final class TestPojoSetterGetter {
      * Constructs a new {@code TestPojoSetterGetter} for testing the setter and getter methods
      * of the specified class.
      *
-     * @param clazz          the class whose setter and getter methods will be tested, must not be null
-     * @param excludeMethods collection of method names to exclude from testing, may be empty but not null
+     * @param clazz           the class whose setter and getter methods will be tested, must not be null
+     * @param excludeMethods  collection of method names to exclude from testing, may be empty but not null
      * @param classPredicate  criteria used to filter classes during processing.
      * @param methodPredicate criteria used to filter methods during processing.
      */

@@ -48,8 +48,8 @@ final class TestPojoRandom {
      * Constructs a new {@code TestPojoRandom} for testing the methods of the specified class
      * with random parameter values.
      *
-     * @param clazz          the class whose methods will be tested, must not be null
-     * @param excludeMethods collection of method names to exclude from testing, may be empty but not null
+     * @param clazz           the class whose methods will be tested, must not be null
+     * @param excludeMethods  collection of method names to exclude from testing, may be empty but not null
      * @param classPredicate  criteria used to filter classes during processing.
      * @param methodPredicate criteria used to filter methods during processing.
      */
