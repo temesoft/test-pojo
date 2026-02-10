@@ -1,6 +1,8 @@
 package io.github.temesoft.testpojo;
 
 import io.github.temesoft.testpojo.exception.TestPojoRawUseException;
+import io.github.temesoft.testpojo.report.TestPojoReportService;
+import io.github.temesoft.testpojo.report.TestPojoReportServiceImpl;
 import org.instancio.Instancio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Internal utility class responsible for testing all accessible methods of a given class
@@ -34,8 +37,12 @@ final class TestPojoRandom {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestPojoRandom.class);
 
-    final Class<?> clazz;
-    final Collection<String> excludeMethods;
+    private final TestPojoReportService reportService = new TestPojoReportServiceImpl();
+
+    private final Class<?> clazz;
+    private final Collection<String> excludeMethods;
+    private final Predicate<Class<?>> classPredicate;
+    private final Predicate<Method> methodPredicate;
 
     /**
      * Constructs a new {@code TestPojoRandom} for testing the methods of the specified class
@@ -43,11 +50,17 @@ final class TestPojoRandom {
      *
      * @param clazz          the class whose methods will be tested, must not be null
      * @param excludeMethods collection of method names to exclude from testing, may be empty but not null
+     * @param classPredicate  criteria used to filter classes during processing.
+     * @param methodPredicate criteria used to filter methods during processing.
      */
     TestPojoRandom(final Class<?> clazz,
-                   final Collection<String> excludeMethods) {
+                   final Collection<String> excludeMethods,
+                   final Predicate<Class<?>> classPredicate,
+                   final Predicate<Method> methodPredicate) {
         this.clazz = clazz;
         this.excludeMethods = excludeMethods;
+        this.classPredicate = classPredicate;
+        this.methodPredicate = methodPredicate;
     }
 
     /**
@@ -87,19 +100,30 @@ final class TestPojoRandom {
      *                                 or an issue with the generated test data.
      */
     void testClass() {
+        if (classPredicate != null && !classPredicate.test(clazz)) {
+            return;
+        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
+            LOGGER.trace("Skipping abstract class: {}", clazz.getName());
             return;
         }
         LOGGER.debug("Running random instantiation test for: {}", clazz.getName());
         final Object object = Instancio.create(clazz);
         final Method[] methods = object.getClass().getMethods();
+        int methodsRan = 0;
         for (final Method method : methods) {
             if (!TestPojoUtils.isMethodExcluded(method, excludeMethods)
                     && !method.getDeclaringClass().equals(Object.class)
                     && !method.getDeclaringClass().equals(Throwable.class)
                     && !method.toString().contains(".build()")
-                    && TestPojoUtils.canAccess(method, object)) {
-                LOGGER.trace("Method: {}", method);
+                    && TestPojoUtils.canAccess(method, object)
+                    && (methodPredicate == null || methodPredicate.test(method))
+                    && !(clazz.isEnum() && method.toString().contains(".valueOf(java.lang.String)"))
+                    && !(clazz.isEnum() && method.toString().contains(" java.lang.Enum."))) {
+                methodsRan++;
+                String message = String.format("Method: %s", method);
+                LOGGER.trace(message);
+                reportService.addReportEntry(TestPojoReportService.TestType.Random, clazz, message);
                 final List<Object> invokeParameters = new ArrayList<>();
                 final Parameter[] parameters = method.getParameters();
                 for (final Parameter parameter : parameters) {
@@ -123,12 +147,22 @@ final class TestPojoRandom {
                     invokeParameters.add(parameterValue);
                 }
                 try {
-                    LOGGER.trace("Arguments: {}", invokeParameters);
-                    final Object unused = method.invoke(object, invokeParameters.toArray(new Object[0]));
+                    if (!invokeParameters.isEmpty()) {
+                        message = String.format("\tArguments: %s", invokeParameters);
+                        LOGGER.trace("{}", message);
+                        reportService.addReportEntry(TestPojoReportService.TestType.Random, clazz, message);
+                    }
+                    final Object response = method.invoke(object, invokeParameters.toArray(new Object[0]));
+                    if (!method.getReturnType().equals(void.class)) {
+                        message = String.format("\tReturn: %s", response);
+                        LOGGER.trace("{}", message);
+                        reportService.addReportEntry(TestPojoReportService.TestType.Random, clazz, message);
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException("Method invocation exception: " + e.getMessage(), e);
                 }
             }
         }
+        LOGGER.trace("Methods tested: {}", methodsRan);
     }
 }

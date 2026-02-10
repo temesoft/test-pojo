@@ -1,6 +1,8 @@
 package io.github.temesoft.testpojo;
 
 import io.github.temesoft.testpojo.exception.TestPojoToStringException;
+import io.github.temesoft.testpojo.report.TestPojoReportService;
+import io.github.temesoft.testpojo.report.TestPojoReportServiceImpl;
 import org.instancio.Instancio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import static io.github.temesoft.testpojo.TestPojoUtils.isMethodExcluded;
 
@@ -31,20 +34,30 @@ final class TestPojoToString {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestPojoToString.class);
 
-    final Class<?> clazz;
-    final Collection<String> excludeMethods;
+    private final TestPojoReportService reportService = new TestPojoReportServiceImpl();
+
+    private final Class<?> clazz;
+    private final Collection<String> excludeMethods;
+    private final Predicate<Class<?>> classPredicate;
+    private final Predicate<Method> methodPredicate;
 
     /**
      * Constructs a new {@code TestPojoToString} for testing the {@code toString()} method
      * of the specified class.
      *
-     * @param clazz          the class whose {@code toString()} method will be tested, must not be null
-     * @param excludeMethods collection of method names to exclude from testing, may be empty but not null
+     * @param clazz           the class whose {@code toString()} method will be tested, must not be null
+     * @param excludeMethods  collection of method names to exclude from testing, may be empty but not null
+     * @param classPredicate  criteria used to filter classes during processing.
+     * @param methodPredicate criteria used to filter methods during processing.
      */
     TestPojoToString(final Class<?> clazz,
-                     final Collection<String> excludeMethods) {
+                     final Collection<String> excludeMethods,
+                     final Predicate<Class<?>> classPredicate,
+                     final Predicate<Method> methodPredicate) {
         this.clazz = clazz;
         this.excludeMethods = excludeMethods;
+        this.classPredicate = classPredicate;
+        this.methodPredicate = methodPredicate;
     }
 
     /**
@@ -93,7 +106,11 @@ final class TestPojoToString {
      *                                   descriptive message
      */
     void testClass() {
+        if (classPredicate != null && !classPredicate.test(clazz)) {
+            return;
+        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
+            LOGGER.trace("Skipping abstract class: {}", clazz.getName());
             return;
         }
         LOGGER.debug("Running toString() test for: {}", clazz.getName());
@@ -101,11 +118,14 @@ final class TestPojoToString {
         final Method[] methods = clazz.getMethods();
         for (final Method method : methods) {
             if (method.getName().equals("toString")
-                    && !method.toString().contains("java.lang.Object.toString()")
                     && method.getReturnType().equals(String.class)
                     && method.getParameterCount() == 0
+                    && (methodPredicate == null || methodPredicate.test(method))
+                    && !clazz.isEnum()
                     && !isMethodExcluded(method, excludeMethods)) {
-                LOGGER.trace("Method: {}", method);
+                final String message = String.format("Method: %s", method);
+                LOGGER.trace(message);
+                reportService.addReportEntry(TestPojoReportService.TestType.ToString, clazz, message);
                 try {
                     final String response = (String) method.invoke(objectRandom);
                     final String responseRepeat = (String) method.invoke(objectRandom);

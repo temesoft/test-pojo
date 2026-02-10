@@ -2,6 +2,9 @@ package io.github.temesoft.testpojo;
 
 import io.github.temesoft.testpojo.exception.TestPojoEqualsException;
 import io.github.temesoft.testpojo.exception.TestPojoHashCodeException;
+import io.github.temesoft.testpojo.report.TestPojoReportService;
+import io.github.temesoft.testpojo.report.TestPojoReportService.TestType;
+import io.github.temesoft.testpojo.report.TestPojoReportServiceImpl;
 import org.instancio.Instancio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import static io.github.temesoft.testpojo.TestPojoUtils.isMethodExcluded;
 
@@ -31,21 +35,31 @@ final class TestPojoEqualsAndHashCode {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestPojoEqualsAndHashCode.class);
 
-    final Class<?> clazz;
-    final Collection<String> excludeMethods;
+    private final TestPojoReportService reportService = new TestPojoReportServiceImpl();
+
+    private final Class<?> clazz;
+    private final Collection<String> excludeMethods;
+    private final Predicate<Class<?>> classPredicate;
+    private final Predicate<Method> methodPredicate;
 
     /**
      * Constructs a new {@code TestPojoEqualsAndHashCode} for testing the {@code equals()} and
      * {@code hashCode()} methods of the specified class.
      *
-     * @param clazz          the class whose {@code equals()} and {@code hashCode()} methods will be tested,
-     *                       must not be null
-     * @param excludeMethods collection of method names to exclude from testing, may be empty but not null
+     * @param clazz           the class whose {@code equals()} and {@code hashCode()} methods will be tested,
+     *                        must not be null
+     * @param excludeMethods  collection of method names to exclude from testing, may be empty but not null
+     * @param classPredicate  criteria used to filter classes during processing.
+     * @param methodPredicate criteria used to filter methods during processing.
      */
     TestPojoEqualsAndHashCode(final Class<?> clazz,
-                              final Collection<String> excludeMethods) {
+                              final Collection<String> excludeMethods,
+                              final Predicate<Class<?>> classPredicate,
+                              final Predicate<Method> methodPredicate) {
         this.clazz = clazz;
         this.excludeMethods = excludeMethods;
+        this.classPredicate = classPredicate;
+        this.methodPredicate = methodPredicate;
     }
 
     /**
@@ -89,7 +103,11 @@ final class TestPojoEqualsAndHashCode {
      *                                   or {@link InvocationTargetException}
      */
     void testClass() {
+        if (classPredicate != null && !classPredicate.test(clazz)) {
+            return;
+        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
+            LOGGER.trace("Skipping abstract class: {}", clazz.getName());
             return;
         }
         LOGGER.debug("Running equals() and hashCode() test for: {}", clazz.getName());
@@ -101,9 +119,13 @@ final class TestPojoEqualsAndHashCode {
                     && method.getReturnType().equals(boolean.class)
                     && method.getParameterCount() == 1
                     && method.getParameters()[0].getType().equals(Object.class)
+                    && (methodPredicate == null || methodPredicate.test(method))
+                    && !clazz.isEnum()
                     && !isMethodExcluded(method, excludeMethods)) {
                 try {
-                    LOGGER.trace("Method: {}", method);
+                    String message = String.format("Method: %s", method);
+                    LOGGER.trace(message);
+                    reportService.addReportEntry(TestType.EqualsAndHashCode, clazz, message);
                     boolean response = (boolean) method.invoke(objectRandom1, (Object) null);
                     if (response) {
                         throw new TestPojoEqualsException(
@@ -140,8 +162,12 @@ final class TestPojoEqualsAndHashCode {
             } else if (method.getName().equals("hashCode")
                     && method.getReturnType().equals(int.class)
                     && method.getParameterCount() == 0
+                    && (methodPredicate == null || methodPredicate.test(method))
+                    && !clazz.isEnum()
                     && !isMethodExcluded(method, excludeMethods)) {
-                LOGGER.trace("Method: {}", method);
+                String message = String.format("Method: %s", method);
+                LOGGER.trace(message);
+                reportService.addReportEntry(TestType.EqualsAndHashCode, clazz, message);
                 try {
                     final int response1 = (int) method.invoke(objectRandom1);
                     final int response2 = (int) method.invoke(objectRandom2);

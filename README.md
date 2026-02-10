@@ -16,12 +16,15 @@ Writing comprehensive tests for POJOs is tedious and repetitive. **test-pojo** a
 - **Automatic validation** of getters and setters
 - **Equals/HashCode contract** verification
 - **ToString consistency** checking
-- **Constructor testing** with random data 
+- **Constructor testing** with random data
+- **Random method invocation** with generated parameters
 - **Package-level scanning** to test multiple classes at once
 - **Fluent API** for readable test code
+- **Comprehensive error messages** with detailed diagnostics
 - **Minimal dependencies** - just Instancio for random data generation
 - **Wide JDK support** - Support JDK 11, 17, 21, 25
 - **Slf4j logging** debug and trace level logging
+- **Test reporting** - Generate and export test execution reports
 
 ## Table of Contents
 
@@ -31,18 +34,24 @@ Writing comprehensive tests for POJOs is tedious and repetitive. **test-pojo** a
     - [Basic Examples](#basic-examples)
     - [Testing Individual Classes](#testing-individual-classes)
     - [Testing Entire Packages](#testing-entire-packages)
-    - [Excluding Methods](#excluding-methods)
+    - [Excluding Methods and Classes](#excluding-methods-and-classes)
     - [Available Test Methods](#available-test-methods)
 - [Advanced Usage](#advanced-usage)
+    - [Test Reporting](#test-reporting)
+    - [Testing POJOs with Special Naming Conventions](#testing-pojos-with-special-naming-conventions)
+    - [Testing Nested POJOs](#testing-nested-pojos)
+- [Exception Handling](#exception-handling)
 - [How It Works](#how-it-works)
 - [Requirements](#requirements)
+- [Limitations and Best Practices](#limitations-and-best-practices)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Quick Start
 
 ```java
-import com.temesoft.test.TestPojo;
+import io.github.temesoft.testpojo.TestPojo;
 import org.junit.Test; // or use JUnit 5 (Jupiter) org.junit.jupiter.api.Test
 
 public class MyPojoTest {
@@ -64,11 +73,10 @@ That's it! This will comprehensively test your POJO's getters, setters, equals, 
 ### Maven
 
 ```xml
-
 <dependency>
     <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -76,7 +84,7 @@ That's it! This will comprehensively test your POJO's getters, setters, equals, 
 ### Gradle
 
 ```gradle
-testImplementation 'io.github.temesoft:test-pojo:1.0.2'
+testImplementation 'io.github.temesoft:test-pojo:1.0.3'
 ```
 
 ## Usage
@@ -141,7 +149,7 @@ public class User {
 **Test class:**
 
 ```java
-import com.temesoft.test.TestPojo;
+import io.github.temesoft.testpojo.TestPojo;
 import org.junit.Test;
 
 public class UserTest {
@@ -207,7 +215,6 @@ public class Product {
 **Test class:**
 
 ```java
-
 @Test
 public void testProductPojo() {
     TestPojo.processClass(Product.class)
@@ -223,7 +230,6 @@ public void testProductPojo() {
 You can test one or more specific classes:
 
 ```java
-
 @Test
 public void testMultiplePojos() {
     TestPojo.processClass(User.class, Product.class, Order.class)
@@ -239,7 +245,6 @@ public void testMultiplePojos() {
 Test all POJOs in a package at once:
 
 ```java
-
 @Test
 public void testAllModels() {
     TestPojo.processPackage("com.mycompany.model")
@@ -251,14 +256,26 @@ public void testAllModels() {
 
 This will automatically discover and test all classes in the `com.mycompany.model` package.
 
-### Excluding Methods
+#### Excluding Classes from Package Testing
 
-Sometimes you need to exclude certain methods from testing:
-
-#### Exclude by Method Name Pattern
+When testing a package, you can exclude specific classes:
 
 ```java
+@Test
+public void testPackageWithExclusions() {
+    TestPojo.processPackage("com.mycompany.model", 
+            AbstractBase.class,    // Exclude abstract classes
+            BaseInterface.class)   // Exclude interfaces
+            .testSettersGetters()
+            .testEqualsAndHashCode();
+}
+```
 
+### Excluding Methods and Classes
+
+#### Exclude Methods by Name Pattern
+
+```java
 @Test
 public void testWithExclusions() {
     TestPojo.processClass(MyPojo.class)
@@ -268,22 +285,9 @@ public void testWithExclusions() {
 }
 ```
 
-#### Exclude Single Method
+#### Exclude Methods by Collection
 
 ```java
-
-@Test
-public void testExcludeSingleMethod() {
-    TestPojo.processClass(MyPojo.class)
-            .excludeMethodContaining("getCalculatedValue")
-            .testSettersGetters();
-}
-```
-
-#### Exclude by Collection
-
-```java
-
 @Test
 public void testExcludeMultiple() {
     List<String> exclusions = Arrays.asList(
@@ -298,22 +302,43 @@ public void testExcludeMultiple() {
 }
 ```
 
+#### Exclude Classes
+
+```java
+@Test
+public void testWithClassExclusions() {
+    TestPojo.processClass(User.class, Product.class, Order.class)
+            .excludeClasses(Order.class)  // Skip Order class
+            .testAll();
+}
+
+// Or with a collection
+@Test
+public void testWithClassExclusionsCollection() {
+    List<Class<?>> exclusions = List.of(AbstractBase.class, TestHelper.class);
+    
+    TestPojo.processPackage("com.mycompany.model")
+            .excludeClasses(exclusions)
+            .testAll();
+}
+```
+
 ### Available Test Methods
 
-| Method                    | Description                   | What It Tests                                                                                                             |
-|---------------------------|-------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| `testSettersGetters()`    | Tests getter/setter pairs     | Validates that setting a value via setter and retrieving via getter returns the same value                                |
-| `testEqualsAndHashCode()` | Tests equals() and hashCode() | Validates equals contract (null check, type check, reflexivity) and hashCode consistency                                  |
-| `testToString()`          | Tests toString() method       | Validates toString() returns consistent results for the same object                                                       |
-| `testConstructor()`       | Tests all constructors        | Validates all public constructors can be invoked with random data                                                         |
-| `testRandom()`            | Random instantiation test     | Tests that class can be instantiated with random field values, calls all public methods (including ones taking arguments) |
+| Method                    | Description                                    | What It Tests                                                                                                             |
+|---------------------------|------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `testSettersGetters()`    | Tests getter/setter pairs                      | Validates that setting a value via setter and retrieving via getter returns the same value                                |
+| `testEqualsAndHashCode()` | Tests equals() and hashCode()                  | Validates equals contract (null check, type check, reflexivity) and hashCode consistency                                  |
+| `testToString()`          | Tests toString() method                        | Validates toString() returns consistent results for the same object                                                       |
+| `testConstructor()`       | Tests all constructors                         | Validates all public constructors can be invoked with random data                                                         |
+| `testRandom()`            | Random instantiation and method invocation     | Tests that class can be instantiated with random field values, calls all public methods (including ones taking arguments) |
+| `testAll()`               | Runs all available tests                       | Equivalent to calling testRandom(), testConstructor(), testSettersGetters(), testEqualsAndHashCode(), and testToString()  |
 
 ### Chaining Methods
 
 All test methods return the `TestPojo` instance, allowing for fluent chaining:
 
 ```java
-
 @Test
 public void testEverything() {
     TestPojo.processClass(MyPojo.class)
@@ -326,6 +351,67 @@ public void testEverything() {
 ```
 
 ## Advanced Usage
+
+### Test Reporting
+
+test-pojo can generate detailed reports about test execution:
+
+#### Print Report to Console
+
+```java
+@Test
+public void testWithReport() {
+    TestPojo testPojo = TestPojo.processPackage("com.mycompany.model")
+            .testAll();
+    
+    testPojo.printReport();  // Prints report to System.out
+}
+```
+
+#### Get Report as String
+
+```java
+@Test
+public void testAndGetReport() {
+    TestPojo testPojo = TestPojo.processPackage("com.mycompany.model")
+            .testAll();
+    
+    String report = testPojo.getReport();
+    // Use report string as needed (log it, assert on it, etc.)
+}
+```
+
+#### Save Report to File
+
+```java
+@Test
+public void testAndSaveReport() throws IOException {
+    TestPojo testPojo = TestPojo.processPackage("com.mycompany.model")
+            .testAll();
+    
+    Path reportPath = Paths.get("target/test-reports/pojo-test-report.txt");
+    testPojo.saveReport(reportPath);
+}
+```
+
+**Sample Report Output:**
+
+```
+Class: com.mycompany.model.User
+	Test type: SetterGetter
+		Testing field: name
+		Testing field: email
+	Test type: EqualsAndHashCode
+		equals() contract verified
+		hashCode() consistency verified
+	Test type: ToString
+		toString() consistency verified
+Class: com.mycompany.model.Product
+	Test type: Constructor
+		Constructor with 3 parameters tested
+	Test type: EqualsAndHashCode
+		equals() contract verified
+```
 
 ### Testing POJOs with Special Naming Conventions
 
@@ -394,28 +480,115 @@ public void testNestedPojos() {
 }
 ```
 
-### Integration with Existing Tests
+### Testing Generic Collections and Maps
 
-test-pojo integrates seamlessly with your existing tests:
+test-pojo properly handles generic collections and maps:
 
 ```java
+public class Order {
+    private List<String> items;
+    private Map<String, Integer> quantities;
+    
+    // Getters and setters with proper generics
+    public List<String> getItems() {
+        return items;
+    }
+    
+    public void setItems(List<String> items) {
+        this.items = items;
+    }
+    
+    public Map<String, Integer> getQuantities() {
+        return quantities;
+    }
+    
+    public void setQuantities(Map<String, Integer> quantities) {
+        this.quantities = quantities;
+    }
+}
 
 @Test
-public void comprehensiveUserTest() {
-    User user = new User();
-
-    // Your custom business logic tests
-    user.setName("John Doe");
-    assertEquals("John Doe", user.getName());
-
-    // ... more custom tests ...
-
-    // Add automated POJO testing
-    TestPojo.processClass(User.class)
-            .testSettersGetters()
-            .testEqualsAndHashCode()
-            .testToString();
+public void testGenerics() {
+    TestPojo.processClass(Order.class)
+            .testSettersGetters();  // Automatically generates typed collections
 }
+```
+
+**Important:** Raw types (collections without generic parameters) will cause a `TestPojoRawUseException`:
+
+```java
+// This will fail:
+public void setItems(List items) { ... }  // Raw type - NO generics
+
+// This will work:
+public void setItems(List<String> items) { ... }  // Properly parameterized
+```
+
+## Exception Handling
+
+test-pojo provides detailed exception messages to help diagnose issues:
+
+### TestPojoEqualsException
+
+Thrown when `equals()` method violates contracts:
+
+```
+Equals method assertion error:
+	Error: Same unchanged object should return true when compared to itself
+	Method: public boolean com.example.User.equals(Object)
+```
+
+### TestPojoHashCodeException
+
+Thrown when `hashCode()` produces unexpected collisions:
+
+```
+HashCode method assertion error:
+	Error: Two objects with different attributes should return different hashCode value
+	Method: public int com.example.User.hashCode()
+```
+
+### TestPojoSetterGetterException
+
+Thrown when setter/getter pair doesn't work correctly:
+
+```
+Setter/Getter assertion error:
+	Error: Getter return value does not correspond to Setter argument used
+	Setter method: public void com.example.User.setName(String)
+	Getter method: public String com.example.User.getName()
+	Expected result: John Doe
+	Actual result: null
+```
+
+### TestPojoToStringException
+
+Thrown when `toString()` is not consistent:
+
+```
+ToString method assertion error:
+	Error: Same unchanged object should return same toString() value every time
+	Method: public String com.example.User.toString()
+```
+
+### TestPojoConstructorException
+
+Thrown when constructor invocation fails:
+
+```
+Constructor assertion error:
+	Error: Constructor instantiation exception: NullPointerException
+	Constructor: public com.example.User(String,String,int)
+```
+
+### TestPojoRawUseException
+
+Thrown when raw types are used instead of parameterized types:
+
+```
+Raw use assertion error:
+	Error: Raw use of parameterized class: java.util.List
+	Method: public void com.example.Order.setItems(List)
 ```
 
 ## How It Works
@@ -429,10 +602,11 @@ public void comprehensiveUserTest() {
 
 #### testSettersGetters()
 
-- Finds all fields in the class
+- Finds all fields in the class (including inherited fields)
 - Locates corresponding getter and setter methods
+- Supports multiple naming conventions (standard, boolean, underscore, direct)
 - Sets a random value via setter
-- Retrieves via getter and verifies it matches
+- Retrieves via getter and verifies it matches using `equals()`
 
 #### testEqualsAndHashCode()
 
@@ -441,7 +615,7 @@ For `equals()`:
 - Null comparison returns false
 - Comparison with different type returns false
 - Two different random objects are not equal
-- Same object compared with itself returns true
+- Same object compared with itself returns true (reflexivity)
 
 For `hashCode()`:
 
@@ -449,24 +623,28 @@ For `hashCode()`:
 
 #### testToString()
 
-- Calling toString() multiple times on same object returns same result
+- Calling toString() multiple times on same unchanged object returns same result
+- Verifies deterministic behavior
 
 #### testConstructor()
 
 - All public constructors can be invoked
 - Random data can be used for all parameter types
+- Supports parameterized types (generics)
 
 #### testRandom()
 
-- All public methods can be invoked with random data arguments when required
-- Random data can be used for all parameter types
-- All public methods exposed by class are invoked using random data
+- Class can be instantiated with random field values
+- All public methods can be invoked with random data arguments
+- Handles parameterized collections and maps
+- Excludes problematic Object methods (wait, notify, etc.)
 
 ## Requirements
 
 - **Java**: 11 or higher
 - **JUnit**: 4.x or 5.x (for running tests)
 - **Instancio**: 5.5.1+ (automatically included)
+- **SLF4J**: 2.0.0+ (for logging)
 
 ## Limitations and Best Practices
 
@@ -478,6 +656,8 @@ For `hashCode()`:
    requirements. Use `excludeMethodsContaining()` to skip these.
 3. **Lazy initialization**: Fields initialized lazily might not be tested correctly by getters/setters.
 4. **Static methods**: Only instance methods are tested.
+5. **Raw types**: Collections and Maps without generic type parameters will cause `TestPojoRawUseException`.
+6. **Abstract classes**: Abstract classes are automatically skipped during testing.
 
 ### Best Practices
 
@@ -485,32 +665,17 @@ For `hashCode()`:
 2. **Exclude when needed**: Use exclusion methods for methods with special behavior
 3. **Test packages carefully**: When using `processPackage()`, ensure all classes in the package are valid POJOs
 4. **Document exclusions**: Comment why certain methods are excluded
+5. **Use proper generics**: Always specify generic type parameters for collections and maps
+6. **Review test reports**: Use the reporting feature to understand what was tested
 
 ```java
-
 @Test
 public void testUserPojo() {
     TestPojo.processClass(User.class)
             // Exclude calculated field that has no setter
-            .excludeMethodContaining("getFullName")
+            .excludeMethodsContaining("getFullName")
             .testSettersGetters()
             .testEqualsAndHashCode();
-}
-```
-
-**ModelPackageTest.java:**
-
-```java
-public class ModelPackageTest {
-
-    @Test
-    public void testAllModelPojos() {
-        TestPojo.processPackage("com.mycompany.model")
-                .testSettersGetters()
-                .testEqualsAndHashCode()
-                .testToString()
-                .testConstructor();
-    }
 }
 ```
 
@@ -523,6 +688,8 @@ If you get errors about missing getters/setters, check:
 - Method naming follows JavaBeans conventions
 - Field types match exactly (e.g., `boolean` vs `Boolean`)
 - Methods are public
+- Getter has no parameters and returns the field type
+- Setter has one parameter of the field type and returns void (or the object for builder pattern)
 
 ### Constructor test failures
 
@@ -531,20 +698,40 @@ If constructor tests fail:
 - Ensure constructors don't have validation that rejects random data
 - Use `excludeMethodsContaining()` to skip problematic constructors
 - Verify all parameter types can be instantiated by Instancio
+- Check for null pointer exceptions in constructor logic
 
 ### Package scanning issues
 
 If `processPackage()` doesn't find classes:
 
-- Verify the package name is correct
+- Verify the package name is correct and fully qualified
 - Ensure classes are compiled
 - Check that classes are accessible (public)
+- Verify the ClassLoader can find the package resources
+
+### TestPojoRawUseException
+
+If you get raw use exceptions:
+
+- Add generic type parameters to all Collection and Map declarations
+- Example: Change `List items` to `List<String> items`
+- Example: Change `Map map` to `Map<String, Integer> map`
+
+### toString() consistency failures
+
+If toString() tests fail:
+
+- Don't include timestamps or random values in toString()
+- Don't include thread IDs or other non-deterministic data
+- Ensure toString() doesn't modify object state
+- Make toString() depend only on object fields
 
 ## Performance Tips
 
 - **Package scanning** can be slow for large packages; consider testing specific classes instead
 - **Exclusions** are evaluated using string matching; keep exclusion lists small
 - **Multiple test runs** on same classes are independent; no caching between runs
+- **Test reports** use static storage; call reset if needed between independent test suites
 
 ## Contributing
 
@@ -563,8 +750,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - [Instancio](https://www.instancio.org/) for excellent random data generation
-
-## Support
-
-- [Documentation](https://javadoc.io/doc/io.github.temesoft/test-pojo)
-- [Issue Tracker](https://github.com/temesoft/test-pojo/issues)
+- All contributors and users of test-pojo
