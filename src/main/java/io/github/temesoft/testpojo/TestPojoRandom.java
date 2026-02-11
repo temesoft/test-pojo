@@ -104,12 +104,17 @@ final class TestPojoRandom {
             LOGGER.trace("Skipping class based on predicate: {}", clazz.getName());
             return;
         }
+        if (Modifier.isInterface(clazz.getModifiers())) {
+            LOGGER.trace("Skipping interface class: {}", clazz.getName());
+            return;
+        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
             LOGGER.trace("Skipping abstract class: {}", clazz.getName());
             return;
         }
         LOGGER.debug("Running random instantiation test for: {}", clazz.getName());
-        final Object object = Instancio.create(clazz);
+
+        final Object object = TestPojoUtils.createObject(clazz);
         final Method[] methods = object.getClass().getMethods();
         int methodsRan = 0;
         for (final Method method : methods) {
@@ -143,7 +148,7 @@ final class TestPojoRandom {
                             throw new TestPojoRawUseException(method, parameter.getType());
                         }
                     } else {
-                        parameterValue = Instancio.create(parameter.getType());
+                        parameterValue = TestPojoUtils.createObject(parameter.getType());
                     }
                     invokeParameters.add(parameterValue);
                 }

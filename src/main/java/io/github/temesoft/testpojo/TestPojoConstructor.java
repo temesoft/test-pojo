@@ -89,6 +89,10 @@ final class TestPojoConstructor {
             return;
         }
         final Constructor<?>[] constructors = clazz.getConstructors();
+        if (Modifier.isInterface(clazz.getModifiers())) {
+            LOGGER.trace("Skipping interface class: {}", clazz.getName());
+            return;
+        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
             LOGGER.trace("Skipping abstract class: {}", clazz.getName());
             return;
