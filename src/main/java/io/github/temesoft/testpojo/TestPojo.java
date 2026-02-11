@@ -1,13 +1,24 @@
 package io.github.temesoft.testpojo;
 
+import io.github.temesoft.testpojo.report.TestPojoReportService;
+import io.github.temesoft.testpojo.report.TestPojoReportServiceImpl;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Main entry point for testing POJOs (Plain Old Java Objects).
  * <p>
  * This class provides a fluent API for testing various aspects of POJOs including:
+ * </p>
  * <ul>
  *   <li>Getters and setters</li>
  *   <li>equals() and hashCode() contracts</li>
@@ -42,13 +53,21 @@ import java.util.Set;
  */
 public class TestPojo {
 
-    final Class<?>[] clazz;
-    final String packageName;
+    private final TestPojoReportService reportService = new TestPojoReportServiceImpl();
+
+    private final Class<?>[] clazz;
+    private final String packageName;
+
     private Collection<String> excludeMethods;
+    private Collection<Class<?>> excludeClasses = Collections.emptyList();
+    private Predicate<Method> methodPredicate;
+    private Predicate<Class<?>> classPredicate;
+    private Predicate<Constructor<?>> constructorPredicate;
 
     private TestPojo(final Class<?>[] clazz, final String packageName) {
         this.clazz = clazz;
         this.packageName = packageName;
+        reportService.reset();
     }
 
     /**
@@ -65,12 +84,17 @@ public class TestPojo {
     /**
      * Creates a TestPojo instance for testing all classes in a package.
      *
-     * @param packageName the fully qualified package name (e.g., "com.example.model")
+     * @param packageName    the fully qualified package name (e.g., "com.example.model")
+     * @param excludeClasses optional array of classes to exclude from testing
      * @return a new TestPojo instance
      * @throws IllegalArgumentException if packageName is null or empty
      */
-    public static TestPojo processPackage(final String packageName) {
-        return new TestPojo(null, packageName);
+    public static TestPojo processPackage(final String packageName, final Class<?>... excludeClasses) {
+        final TestPojo result = new TestPojo(null, packageName);
+        if (excludeClasses != null) {
+            result.excludeClasses = List.of(excludeClasses);
+        }
+        return result;
     }
 
     /**
@@ -99,13 +123,40 @@ public class TestPojo {
     }
 
     /**
-     * Excludes methods containing the specified string from testing.
+     * Excludes a single class from testing.
+     * <p>
+     * Classes specified through this method will be completely skipped during the test execution.
+     * This is useful when certain classes should not be tested, such as abstract classes,
+     * interfaces, or classes with special instantiation requirements.
+     * </p>
+     * <p>
+     * Note: Calling this method replaces any previously configured class exclusions.
+     * </p>
      *
-     * @param excludeMethod string to match against method signatures
-     * @return this TestPojo instance for method chaining
+     * @param classesToExclude the class to exclude from testing, must not be {@code null}
+     * @return this {@code TestPojo} instance for method chaining
      */
-    public TestPojo excludeMethodContaining(final String excludeMethod) {
-        this.excludeMethods = List.of(excludeMethod);
+    public TestPojo excludeClasses(final Class<?>... classesToExclude) {
+        excludeClasses = List.of(classesToExclude);
+        return this;
+    }
+
+    /**
+     * Excludes multiple classes from testing.
+     * <p>
+     * Classes specified through this method will be completely skipped during the test execution.
+     * This is useful when certain classes should not be tested, such as abstract classes,
+     * interfaces, or classes with special instantiation requirements.
+     * </p>
+     * <p>
+     * Note: Calling this method replaces any previously configured class exclusions.
+     * </p>
+     *
+     * @param classesToExclude collection of classes to exclude from testing, must not be {@code null}
+     * @return this {@code TestPojo} instance for method chaining
+     */
+    public TestPojo excludeClasses(final Collection<Class<?>> classesToExclude) {
+        excludeClasses = classesToExclude;
         return this;
     }
 
@@ -141,7 +192,8 @@ public class TestPojo {
      * @return this TestPojo instance for method chaining
      */
     public TestPojo testRandom() {
-        processClasses(aClass -> new TestPojoRandom(aClass, excludeMethods).testClass());
+        processClasses(aClass -> new TestPojoRandom(aClass, excludeMethods, classPredicate, methodPredicate)
+                .testClass());
         return this;
     }
 
@@ -159,7 +211,8 @@ public class TestPojo {
      * @return this TestPojo instance for method chaining
      */
     public TestPojo testSettersGetters() {
-        processClasses(aClass -> new TestPojoSetterGetter(aClass, excludeMethods).testClass());
+        processClasses(aClass -> new TestPojoSetterGetter(aClass, excludeMethods, classPredicate, methodPredicate)
+                .testClass());
         return this;
     }
 
@@ -182,7 +235,8 @@ public class TestPojo {
      * @return this TestPojo instance for method chaining
      */
     public TestPojo testEqualsAndHashCode() {
-        processClasses(aClass -> new TestPojoEqualsAndHashCode(aClass, excludeMethods).testClass());
+        processClasses(aClass -> new TestPojoEqualsAndHashCode(aClass, excludeMethods, classPredicate, methodPredicate)
+                .testClass());
         return this;
     }
 
@@ -196,7 +250,8 @@ public class TestPojo {
      * @return this TestPojo instance for method chaining
      */
     public TestPojo testToString() {
-        processClasses(aClass -> new TestPojoToString(aClass, excludeMethods).testClass());
+        processClasses(aClass -> new TestPojoToString(aClass, excludeMethods, classPredicate, methodPredicate)
+                .testClass());
         return this;
     }
 
@@ -212,7 +267,82 @@ public class TestPojo {
      * @return this TestPojo instance for method chaining
      */
     public TestPojo testConstructor() {
-        processClasses(aClass -> new TestPojoConstructor(aClass, excludeMethods).testClass());
+        processClasses(aClass -> new TestPojoConstructor(aClass, classPredicate, constructorPredicate).testClass());
+        return this;
+    }
+
+    /**
+     * Prints the test execution report to standard output (console).
+     * <p>
+     * The report includes information about all classes tested and any findings
+     * from each test type that was executed.
+     * </p>
+     */
+    public void printReport() {
+        reportService.saveReport();
+    }
+
+    /**
+     * Retrieves the test execution report as a string.
+     * <p>
+     * The report includes information about all classes tested and any findings
+     * from each test type that was executed. The report is formatted with proper
+     * indentation for readability.
+     * </p>
+     *
+     * @return the complete test report as a string, never {@code null}
+     */
+    public String getReport() {
+        return reportService.getReport();
+    }
+
+    /**
+     * Saves the test execution report to a file.
+     * <p>
+     * The report is written to the specified path using UTF-8 encoding. If a file
+     * already exists at the path, it will be overwritten.
+     * </p>
+     *
+     * @param path the file path where the report should be saved, must not be {@code null}
+     * @throws IOException if an I/O error occurs while writing the file
+     */
+    public void saveReport(final Path path) throws IOException {
+        reportService.saveReport(path);
+    }
+
+    /**
+     * Sets the criteria used to filter methods during processing.
+     *
+     * @param methodPredicate the {@link Predicate} used to evaluate which {@link java.lang.reflect.Method}
+     *                        objects should be included
+     * @return the current {@link TestPojo} instance for chaining
+     */
+    public TestPojo filterMethods(final Predicate<Method> methodPredicate) {
+        this.methodPredicate = methodPredicate;
+        return this;
+    }
+
+    /**
+     * Sets the criteria used to filter classes during processing.
+     *
+     * @param classPredicate the {@link Predicate} used to evaluate which {@link java.lang.Class}
+     *                       objects should be included
+     * @return the current {@link TestPojo} instance for chaining
+     */
+    public TestPojo filterClasses(final Predicate<Class<?>> classPredicate) {
+        this.classPredicate = classPredicate;
+        return this;
+    }
+
+    /**
+     * Sets the criteria used to filter constructor during processing.
+     *
+     * @param constructorPredicate the {@link Predicate} used to evaluate which {@link java.lang.reflect.Constructor}
+     *                             objects should be included
+     * @return the current {@link TestPojo} instance for chaining
+     */
+    public TestPojo filterConstructors(final Predicate<Constructor<?>> constructorPredicate) {
+        this.constructorPredicate = constructorPredicate;
         return this;
     }
 
@@ -225,14 +355,18 @@ public class TestPojo {
      *
      * @param testFunction the function to apply to each class
      */
-    private void processClasses(java.util.function.Consumer<Class<?>> testFunction) {
+    private void processClasses(final Consumer<Class<?>> testFunction) {
         if (clazz != null) {
             for (final Class<?> aClass : clazz) {
-                testFunction.accept(aClass);
+                if (!excludeClasses.contains(aClass)) {
+                    testFunction.accept(aClass);
+                }
             }
         } else if (packageName != null) {
             final Set<Class<?>> classes = ManualClassFinder.findAllClassesUsingClassLoader(packageName);
-            classes.forEach(testFunction);
+            classes.stream()
+                    .filter(aClass -> !excludeClasses.contains(aClass))
+                    .forEach(testFunction);
         }
     }
 }
