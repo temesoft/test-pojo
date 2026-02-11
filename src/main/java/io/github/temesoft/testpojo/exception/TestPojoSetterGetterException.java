@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
  *   <li>The actual value (what was retrieved)</li>
  * </ul>
  *
- * <h3>Common causes:</h3>
+ * <strong>Common causes:</strong>
  * <ul>
  *   <li>Setter assigns to wrong field</li>
  *   <li>Getter returns wrong field</li>
@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
  *   <li>Incorrect {@code equals()} implementation on the field type</li>
  * </ul>
  *
- * <h3>Example of problematic code:</h3>
+ * <strong>Example of problematic code:</strong>
  * <pre>{@code
  * private String name;
  * private String description;

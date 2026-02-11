@@ -29,7 +29,7 @@ import java.util.function.Predicate;
  *
  * <h2>Usage Examples:</h2>
  *
- * <h3>Testing a single class:</h3>
+ * <strong>Testing a single class:</strong>
  * <pre>{@code
  * TestPojo.processClass(MyPojo.class)
  *     .testSettersGetters()
@@ -37,13 +37,13 @@ import java.util.function.Predicate;
  *     .testToString();
  * }</pre>
  *
- * <h3>Testing multiple classes:</h3>
+ * <strong>Testing multiple classes:</strong>
  * <pre>{@code
  * TestPojo.processClass(User.class, Product.class, Order.class)
  *     .testAll(); // includes setters/getters, equals/hashCode, constructor, and random instantiation
  * }</pre>
  *
- * <h3>Testing an entire package:</h3>
+ * <strong>Testing an entire package:</strong>
  * <pre>{@code
  * TestPojo.processPackage("com.mycompany.model")
  *     .excludeMethodsContaining("getClass")

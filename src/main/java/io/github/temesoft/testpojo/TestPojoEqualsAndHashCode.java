@@ -69,7 +69,7 @@ final class TestPojoEqualsAndHashCode {
      * the following validations:
      * </p>
      *
-     * <h3>equals() method tests:</h3>
+     * <strong>equals() method tests:</strong>
      * <ul>
      *   <li><strong>Null check:</strong> {@code equals(null)} must return {@code false}</li>
      *   <li><strong>Type check:</strong> {@code equals(differentType)} must return {@code false}</li>
@@ -77,7 +77,7 @@ final class TestPojoEqualsAndHashCode {
      *   <li><strong>Reflexivity:</strong> An object must equal itself ({@code obj.equals(obj)} returns {@code true})</li>
      * </ul>
      *
-     * <h3>hashCode() method tests:</h3>
+     * <strong>hashCode() method tests:</strong>
      * <ul>
      *   <li><strong>Consistency:</strong> Two objects with different random data should produce different hash codes
      *       (though hash code collisions are theoretically possible, they should be rare for randomly generated data)</li>

@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
  *   <li>The full signature of the {@code toString()} method that failed</li>
  * </ul>
  *
- * <h3>Common causes:</h3>
+ * <strong>Common causes:</strong>
  * <ul>
  *   <li>Including timestamps or current time in the string representation</li>
  *   <li>Including random values or UUIDs generated on each call</li>
@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
  *   <li>Dependency on external mutable state</li>
  * </ul>
  *
- * <h3>Example of problematic code:</h3>
+ * <strong>Example of problematic code:</strong>
  * <pre>{@code
  * public String toString() {
  *     return "User{name='" + name +
@@ -36,7 +36,7 @@ import java.lang.reflect.Method;
  * }
  * }</pre>
  *
- * <h3>Example of correct code:</h3>
+ * <strong>Example of correct code:</strong>
  * <pre>{@code
  * public String toString() {
  *     return "User{name='" + name +

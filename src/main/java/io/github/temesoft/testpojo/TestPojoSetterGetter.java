@@ -84,14 +84,14 @@ final class TestPojoSetterGetter {
      *   <li>Invokes the getter and verifies it returns the same value</li>
      * </ol>
      *
-     * <h3>Setter method discovery (tried in order):</h3>
+     * <strong>Setter method discovery (tried in order):</strong>
      * <ul>
      *   <li>{@code setFieldName(Type)} - standard JavaBeans convention</li>
      *   <li>{@code set_fieldName(Type)} - underscore variant</li>
      *   <li>{@code fieldName(Type)} - builder-style setter</li>
      * </ul>
      *
-     * <h3>Getter method discovery (tried in order):</h3>
+     * <strong>Getter method discovery (tried in order):</strong>
      * <ul>
      *   <li>{@code getFieldName()} - standard JavaBeans convention</li>
      *   <li>{@code get_fieldName()} - underscore variant</li>
@@ -99,7 +99,7 @@ final class TestPojoSetterGetter {
      *   <li>{@code fieldName()} - direct field name accessor</li>
      * </ul>
      *
-     * <h3>Value generation:</h3>
+     * <strong>Value generation:</strong>
      * <ul>
      *   <li>For {@link Collection} and {@link Map} fields with generic type information:
      *       creates instances with proper type parameters using Instancio</li>
@@ -107,7 +107,7 @@ final class TestPojoSetterGetter {
      *   <li>Handles parameterized types by extracting and applying generic type arguments</li>
      * </ul>
      *
-     * <h3>Validation:</h3>
+     * <strong>Validation:</strong>
      * <p>
      * After setting a value, the getter is invoked and the result is compared with the original
      * value using {@link Object#equals(Object)}. The test fails if:
