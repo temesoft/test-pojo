@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
  *   <li>The full signature of the {@code equals()} method that failed</li>
  * </ul>
  *
- * <h3>Common causes:</h3>
+ * <strong>Common causes:</strong>
  * <ul>
  *   <li>Returning {@code true} when compared with {@code null}</li>
  *   <li>Returning {@code true} when compared with an object of a different type</li>

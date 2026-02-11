@@ -73,7 +73,7 @@ final class TestPojoToString {
      *   <li>Verifies that both invocations return equal string values</li>
      * </ol>
      *
-     * <h3>Method signature requirements:</h3>
+     * <strong>Method signature requirements:</strong>
      * <p>
      * Only methods matching the exact {@code toString()} signature are tested:
      * </p>
@@ -84,7 +84,7 @@ final class TestPojoToString {
      *   <li>Must not be in the excluded methods collection</li>
      * </ul>
      *
-     * <h3>Consistency validation:</h3>
+     * <strong>Consistency validation:</strong>
      * <p>
      * The test verifies that calling {@code toString()} multiple times on the same object
      * without any state changes produces equal results, as determined by

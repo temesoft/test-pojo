@@ -33,7 +33,7 @@ import static io.github.temesoft.testpojo.report.TestPojoReportService.TestType.
  * indented underneath. This provides a clear, hierarchical view of test results.
  * </p>
  *
- * <h3>Report Format Example:</h3>
+ * <strong>Report Format Example:</strong>
  * <pre>
  * Class: com.example.User
  *     Test type: SetterGetter

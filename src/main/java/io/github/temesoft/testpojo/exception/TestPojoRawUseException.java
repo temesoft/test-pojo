@@ -20,14 +20,14 @@ import java.lang.reflect.Method;
  *   <li>The method or constructor signature where the raw type was found</li>
  * </ul>
  *
- * <h3>Examples of raw type usage (bad):</h3>
+ * <strong>Examples of raw type usage (bad):</strong>
  * <pre>{@code
  * public void setItems(List items) { ... }           // Raw List
  * public void setMap(Map map) { ... }                // Raw Map
  * public MyClass(Collection collection) { ... }      // Raw Collection in constructor
  * }</pre>
  *
- * <h3>Examples of properly parameterized types (good):</h3>
+ * <strong>Examples of properly parameterized types (good):</strong>
  * <pre>{@code
  * public void setItems(List<String> items) { ... }        // Parameterized List
  * public void setMap(Map<String, Integer> map) { ... }    // Parameterized Map

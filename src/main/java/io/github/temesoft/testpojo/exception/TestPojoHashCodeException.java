@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
  *   <li>The full signature of the {@code hashCode()} method that failed</li>
  * </ul>
  *
- * <h3>Common causes:</h3>
+ * <strong>Common causes:</strong>
  * <ul>
  *   <li>Poor {@code hashCode()} implementation that doesn't incorporate all relevant fields</li>
  *   <li>Constant hash code value being returned</li>

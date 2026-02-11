@@ -77,7 +77,7 @@ final class TestPojoRandom {
      *   <li>Invokes the method with the generated parameters</li>
      * </ol>
      *
-     * <h3>Methods excluded from testing:</h3>
+     * <strong>Methods excluded from testing:</strong>
      * <ul>
      *   <li>Methods in the {@code excludeMethods} collection</li>
      *   <li>Methods that are not accessible from the current context</li>
@@ -85,7 +85,7 @@ final class TestPojoRandom {
      *   <li>Core {@link Throwable} methods</li>
      * </ul>
      *
-     * <h3>Parameter generation:</h3>
+     * <strong>Parameter generation:</strong>
      * <ul>
      *   <li>For {@link Collection} and {@link Map} parameters with generic type information:
      *       creates instances with proper type parameters using Instancio</li>
