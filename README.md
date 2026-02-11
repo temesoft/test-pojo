@@ -82,7 +82,7 @@ public class MyPojoTest {
 <dependency>
     <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -90,7 +90,7 @@ public class MyPojoTest {
 ### Gradle
 
 ```gradle
-testImplementation 'io.github.temesoft:test-pojo:1.0.3'
+testImplementation 'io.github.temesoft:test-pojo:1.0.4'
 ```
 
 ## Usage
