@@ -20,6 +20,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
+        <lombok.version>1.18.42</lombok.version>
 
         <!-- plugin versions -->
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
@@ -58,7 +59,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.42</version>
+            <version>${lombok.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -200,6 +201,13 @@
                     <fork>true</fork>
                     <release>11</release>
                     <encoding>UTF-8</encoding>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
 <!--                    <compilerArgs>-->
 <!--                        <arg>-XDcompilePolicy=simple</arg>-->
 <!--                        <arg>-Xplugin:ErrorProne</arg>-->
