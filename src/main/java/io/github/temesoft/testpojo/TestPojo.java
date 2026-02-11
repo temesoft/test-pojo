@@ -341,7 +341,7 @@ public class TestPojo {
      *                             objects should be included
      * @return the current {@link TestPojo} instance for chaining
      */
-    public TestPojo filterConstructor(final Predicate<Constructor<?>> constructorPredicate) {
+    public TestPojo filterConstructors(final Predicate<Constructor<?>> constructorPredicate) {
         this.constructorPredicate = constructorPredicate;
         return this;
     }

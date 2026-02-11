@@ -23,7 +23,7 @@ public class TestPojoConstructorTest {
     @Test
     public void testConstructorPredicate() {
         final String report = TestPojo.processClass(Pojo1.class, PojoImmutable.class)
-                .filterConstructor(constructor -> constructor.getParameters().length > 0)
+                .filterConstructors(constructor -> constructor.getParameters().length > 0)
                 .testConstructor()
                 .getReport();
         assertFalse(report.contains("Class: " + Pojo1.class.getName()));

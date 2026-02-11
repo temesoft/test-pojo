@@ -104,6 +104,7 @@ final class TestPojoEqualsAndHashCode {
      */
     void testClass() {
         if (classPredicate != null && !classPredicate.test(clazz)) {
+            LOGGER.trace("Skipping class based on predicate: {}", clazz.getName());
             return;
         }
         if (Modifier.isAbstract(clazz.getModifiers())) {
@@ -119,7 +120,7 @@ final class TestPojoEqualsAndHashCode {
                     && method.getReturnType().equals(boolean.class)
                     && method.getParameterCount() == 1
                     && method.getParameters()[0].getType().equals(Object.class)
-                    && (methodPredicate == null || methodPredicate.test(method))
+                    && checkMethodPredicate(method)
                     && !clazz.isEnum()
                     && !isMethodExcluded(method, excludeMethods)) {
                 try {
@@ -162,7 +163,7 @@ final class TestPojoEqualsAndHashCode {
             } else if (method.getName().equals("hashCode")
                     && method.getReturnType().equals(int.class)
                     && method.getParameterCount() == 0
-                    && (methodPredicate == null || methodPredicate.test(method))
+                    && checkMethodPredicate(method)
                     && !clazz.isEnum()
                     && !isMethodExcluded(method, excludeMethods)) {
                 String message = String.format("Method: %s", method);
@@ -184,5 +185,20 @@ final class TestPojoEqualsAndHashCode {
                 }
             }
         }
+    }
+
+    /**
+     * Evaluates whether a given method matches the configured filtering criteria.
+     * If no {@code methodPredicate} has been defined (is {@code null}), this method
+     * defaults to {@code true}, effectively including all methods.
+     *
+     * @param method the {@link java.lang.reflect.Method} to evaluate against the predicate
+     * @return {@code true} if the method matches the predicate or if no predicate is set;
+     * {@code false} otherwise
+     */
+    private boolean checkMethodPredicate(final Method method) {
+        final boolean result = (methodPredicate == null || methodPredicate.test(method));
+        LOGGER.trace("Skipping method based on predicate: {}", method);
+        return result;
     }
 }

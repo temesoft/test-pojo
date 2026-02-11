@@ -101,6 +101,7 @@ final class TestPojoRandom {
      */
     void testClass() {
         if (classPredicate != null && !classPredicate.test(clazz)) {
+            LOGGER.trace("Skipping class based on predicate: {}", clazz.getName());
             return;
         }
         if (Modifier.isAbstract(clazz.getModifiers())) {
@@ -117,7 +118,7 @@ final class TestPojoRandom {
                     && !method.getDeclaringClass().equals(Throwable.class)
                     && !method.toString().contains(".build()")
                     && TestPojoUtils.canAccess(method, object)
-                    && (methodPredicate == null || methodPredicate.test(method))
+                    && checkMethodPredicate(method)
                     && !(clazz.isEnum() && method.toString().contains(".valueOf(java.lang.String)"))
                     && !(clazz.isEnum() && method.toString().contains(" java.lang.Enum."))) {
                 methodsRan++;
@@ -164,5 +165,20 @@ final class TestPojoRandom {
             }
         }
         LOGGER.trace("Methods tested: {}", methodsRan);
+    }
+
+    /**
+     * Evaluates whether a given method matches the configured filtering criteria.
+     * If no {@code methodPredicate} has been defined (is {@code null}), this method
+     * defaults to {@code true}, effectively including all methods.
+     *
+     * @param method the {@link java.lang.reflect.Method} to evaluate against the predicate
+     * @return {@code true} if the method matches the predicate or if no predicate is set;
+     * {@code false} otherwise
+     */
+    private boolean checkMethodPredicate(final Method method) {
+        final boolean result = (methodPredicate == null || methodPredicate.test(method));
+        LOGGER.trace("Skipping method based on predicate: {}", method);
+        return result;
     }
 }

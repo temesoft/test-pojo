@@ -140,6 +140,7 @@ public class TestPojoTest {
         assertTrue(report.contains("Test type: EqualsAndHashCode"));
         assertTrue(report.contains("Test type: Constructor"));
         assertTrue(report.contains("Test type: Random"));
+        Files.delete(path);
     }
 
     @Test

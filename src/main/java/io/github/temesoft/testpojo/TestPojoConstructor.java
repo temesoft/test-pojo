@@ -85,6 +85,7 @@ final class TestPojoConstructor {
      */
     void testClass() {
         if (classPredicate != null && !classPredicate.test(clazz)) {
+            LOGGER.trace("Skipping class based on predicate: {}", clazz.getName());
             return;
         }
         final Constructor<?>[] constructors = clazz.getConstructors();
@@ -99,7 +100,8 @@ final class TestPojoConstructor {
         LOGGER.debug("Running constructor test for: {}", clazz.getName());
         for (final Constructor<?> constructor : constructors) {
             if (constructorPredicate != null && !constructorPredicate.test(constructor)) {
-                return;
+                LOGGER.trace("Skipping constructor based on predicate: {}", constructor);
+                continue;
             }
             String message = String.format("Constructor: %s", constructor);
             LOGGER.trace(message);

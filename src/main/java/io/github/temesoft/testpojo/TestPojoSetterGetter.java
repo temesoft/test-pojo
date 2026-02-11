@@ -132,6 +132,7 @@ final class TestPojoSetterGetter {
      */
     void testClass() {
         if (classPredicate != null && !classPredicate.test(clazz)) {
+            LOGGER.trace("Skipping class based on predicate: {}", clazz.getName());
             return;
         }
         if (Modifier.isAbstract(clazz.getModifiers())) {
@@ -167,7 +168,6 @@ final class TestPojoSetterGetter {
             }
 
             if (!TestPojoUtils.isMethodExcluded(setterMethodFound, excludeMethods)) {
-
                 Method getterMethodFound = getGetterMethodWithNameAndReturnType(
                         methods,
                         "get" + field.getName(),
@@ -201,7 +201,7 @@ final class TestPojoSetterGetter {
 
                 if (setterMethodFound != null
                         && getterMethodFound != null
-                        && (methodPredicate == null || (methodPredicate.test(setterMethodFound) && methodPredicate.test(getterMethodFound)))
+                        && checkMethodPredicate(setterMethodFound, getterMethodFound)
                         && !isMethodExcluded(setterMethodFound, excludeMethods)
                         && !isMethodExcluded(getterMethodFound, excludeMethods)) {
                     String message = String.format("Using setter method: %s", setterMethodFound);
@@ -252,5 +252,23 @@ final class TestPojoSetterGetter {
                 }
             }
         }
+    }
+
+    /**
+     * Evaluates whether a given setter and getter methods match the configured filtering criteria.
+     * If no {@code methodPredicate} has been defined (is {@code null}), this method
+     * defaults to {@code true}, effectively including all methods.
+     *
+     * @param setterMethodFound the setter {@link java.lang.reflect.Method} to evaluate against the predicate
+     * @param getterMethodFound the getter {@link java.lang.reflect.Method} to evaluate against the predicate
+     * @return {@code true} if both methods match the predicate or if no predicate is set;
+     * {@code false} otherwise
+     */
+    private boolean checkMethodPredicate(final Method setterMethodFound, final Method getterMethodFound) {
+        final boolean result = (methodPredicate == null
+                || (methodPredicate.test(setterMethodFound) && methodPredicate.test(getterMethodFound)));
+        LOGGER.trace("Skipping setter method based on predicate: {}", setterMethodFound);
+        LOGGER.trace("Skipping getter method based on predicate: {}", getterMethodFound);
+        return result;
     }
 }
