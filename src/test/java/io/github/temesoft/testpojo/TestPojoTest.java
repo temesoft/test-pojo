@@ -7,9 +7,14 @@ import io.github.temesoft.testpojo.exception.TestPojoRawUseException;
 import io.github.temesoft.testpojo.exception.TestPojoSetterGetterException;
 import io.github.temesoft.testpojo.exception.TestPojoToStringException;
 import io.github.temesoft.testpojo.model.Pojo1;
+import io.github.temesoft.testpojo.model.PojoAbstractBase;
 import io.github.temesoft.testpojo.model.PojoComplex1;
 import io.github.temesoft.testpojo.model.PojoExtendingAbstractBase;
 import io.github.temesoft.testpojo.model.PojoImmutable;
+import io.github.temesoft.testpojo.model.PojoInterface;
+import io.github.temesoft.testpojo.model.PojoParametrized1;
+import io.github.temesoft.testpojo.model.PojoParametrized2;
+import io.github.temesoft.testpojo.model.PojoParametrized3;
 import io.github.temesoft.testpojo.model.Pojo_BadEquals_1;
 import io.github.temesoft.testpojo.model.Pojo_BadEquals_2;
 import io.github.temesoft.testpojo.model.Pojo_BadEquals_3;
@@ -178,5 +183,27 @@ public class TestPojoTest {
                         "\tError: Raw use of parameterized class: java.util.Map\n" +
                         "\tMethod: public void io.github.temesoft.testpojo.model.Pojo_BadRawUsageInSetter.setHeaders(java.util.Map)",
                 thrown.getMessage());
+    }
+
+    @Test
+    public void testParameterizedSupport() {
+        TestPojo.processClass(PojoParametrized1.class, PojoParametrized2.class, PojoParametrized3.class)
+                .testAll();
+    }
+
+    @Test
+    public void testAbstractClass() {
+        final String report = TestPojo.processClass(PojoAbstractBase.class)
+                .testAll()
+                .getReport();
+        assertTrue(report.isEmpty());
+    }
+
+    @Test
+    public void testInterface() {
+        final String report = TestPojo.processClass(PojoInterface.class)
+                .testAll()
+                .getReport();
+        assertTrue(report.isEmpty());
     }
 }

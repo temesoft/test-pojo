@@ -5,7 +5,6 @@ import io.github.temesoft.testpojo.exception.TestPojoHashCodeException;
 import io.github.temesoft.testpojo.report.TestPojoReportService;
 import io.github.temesoft.testpojo.report.TestPojoReportService.TestType;
 import io.github.temesoft.testpojo.report.TestPojoReportServiceImpl;
-import org.instancio.Instancio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,13 +106,17 @@ final class TestPojoEqualsAndHashCode {
             LOGGER.trace("Skipping class based on predicate: {}", clazz.getName());
             return;
         }
+        if (Modifier.isInterface(clazz.getModifiers())) {
+            LOGGER.trace("Skipping interface class: {}", clazz.getName());
+            return;
+        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
             LOGGER.trace("Skipping abstract class: {}", clazz.getName());
             return;
         }
         LOGGER.debug("Running equals() and hashCode() test for: {}", clazz.getName());
-        final Object objectRandom1 = Instancio.create(clazz);
-        final Object objectRandom2 = Instancio.create(clazz);
+        final Object objectRandom1 = TestPojoUtils.createObject(clazz);
+        final Object objectRandom2 = TestPojoUtils.createObject(clazz);
         final Method[] methods = clazz.getMethods();
         for (final Method method : methods) {
             if (method.getName().equals("equals")

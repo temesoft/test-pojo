@@ -1,10 +1,14 @@
 package io.github.temesoft.testpojo;
 
+import org.instancio.Instancio;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -134,24 +138,59 @@ final class TestPojoUtils {
     }
 
     /**
-     * Converts an array of {@link Type} objects to an array of {@link Class} objects.
+     * Converts an array of {@link Type} objects into an array of {@link Class} objects by
+     * resolving raw types and type variable bounds.
      * <p>
-     * This utility method performs an unchecked cast from {@link Type} to {@link Class},
-     * which is safe when the types are known to be class types (not wildcards, type variables,
-     * or parameterized types). This is typically used when extracting actual type arguments
-     * from parameterized types.
-     * </p>
+     * This method performs safe resolution of various {@link Type} implementations:
+     * <ul>
+     *     <li><b>Class:</b> Directly added to the result.</li>
+     *     <li><b>ParameterizedType:</b> The raw type (e.g., {@code List} from {@code List<String>}) is extracted.</li>
+     *     <li><b>TypeVariable:</b> The first upper bound is inspected. If the bound is
+     *         {@link Object}, it is mapped to {@link String}; otherwise, the bound's raw
+     *         class is resolved.</li>
+     * </ul>
      *
-     * @param types array of types to convert, must not be {@code null}
-     * @return array of {@link Class} objects corresponding to the input types
-     * @throws ClassCastException if any of the types cannot be cast to {@link Class}
+     * @param types an array of {@link Type} instances to be converted
+     * @return an array of {@link Class} objects representing the best-effort resolution
+     * of the provided types
+     * @see java.lang.reflect.ParameterizedType#getRawType()
+     * @see java.lang.reflect.TypeVariable#getBounds()
      */
     public static Class<?>[] typesToClasses(final Type[] types) {
+        if (types == null) {
+            return new Class[0];
+        }
         final List<Class<?>> result = new ArrayList<>();
         for (final Type type : types) {
-            result.add((Class<?>) type);
+            final Class<?> resolvedClass = resolveToClass(type);
+            if (resolvedClass != null) {
+                result.add(resolvedClass);
+            }
         }
         return result.toArray(new Class[0]);
+    }
+
+    /**
+     * Helper to safely extract a Class from a Type without risk of ClassCastException.
+     */
+    private static Class<?> resolveToClass(final Type type) {
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        }
+        if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        }
+        if (type instanceof TypeVariable) {
+            final Type[] bounds = ((TypeVariable<?>) type).getBounds();
+            if (bounds.length > 0) {
+                if (Object.class.equals(bounds[0])) {
+                    return String.class;
+                }
+                return resolveToClass(bounds[0]);
+            }
+        }
+
+        throw new IllegalStateException("Unable to resolve type [" + type + "] to class");
     }
 
     /**
@@ -200,5 +239,60 @@ final class TestPojoUtils {
     public static boolean canAccess(final Method method, final Object object) {
         return (Modifier.isStatic(method.getModifiers()) && method.canAccess(null))
                 || (!Modifier.isStatic(method.getModifiers()) && method.canAccess(object));
+    }
+
+    /**
+     * Creates an instance of the specified class, automatically resolving generic type
+     * parameters where necessary.
+     * <p>
+     * This method applies specific mapping rules for unknown or broad types:
+     * <ul>
+     *     <li>If the class is {@link java.lang.Class}, it returns {@link java.lang.String String.class}.</li>
+     *     <li>If the class is {@link java.lang.Object}, it returns a generated {@link java.lang.String}.</li>
+     *     <li>If a {@link java.lang.reflect.TypeVariable TypeVariable} has {@link java.lang.Object}
+     *         as its primary bound, it is instantiated using {@link java.lang.String}.</li>
+     * </ul>
+     * <p>
+     * The actual object instantiation is delegated to the
+     * <a href="https://www.instancio.org">Instancio library</a>, which handles
+     * the population of fields and generic type arguments.
+     *
+     * @param clazz the {@link Class} to be instantiated
+     * @return a fully populated object of the requested type, or a {@link String}-based
+     * alternative according to the mapping rules
+     * @throws org.instancio.exception.InstancioException if Instancio fails to create the object
+     */
+    public static Object createObject(final Class<?> clazz) {
+        final TypeVariable<?>[] typeAttributes = clazz.getTypeParameters();
+        final Object object;
+        if (typeAttributes.length > 0) {
+            final List<Class<?>> typedParameters = new ArrayList<>();
+            for (int i = 0; i < typeAttributes.length; i++) {
+                final TypeVariable<?> typeAttribute = typeAttributes[i];
+                Class<?>[] bounds = TestPojoUtils.typesToClasses(typeAttribute.getBounds());
+                if (bounds.length > 0) {
+                    if (bounds[0].equals(Object.class)) {
+                        typedParameters.add(String.class);
+                    } else {
+                        typedParameters.add(bounds[0]);
+                    }
+                }
+            }
+            if (clazz.equals(java.lang.Class.class)) {
+                object = java.lang.String.class;
+            } else {
+                object = Instancio.of(clazz)
+                        .withTypeParameters(typedParameters.toArray(new Class[0]))
+                        .create();
+            }
+        } else {
+            if (clazz.equals(Object.class)) {
+                object = Instancio.create(String.class);
+            } else {
+                object = Instancio.create(clazz);
+            }
+
+        }
+        return object;
     }
 }

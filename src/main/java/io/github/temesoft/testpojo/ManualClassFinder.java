@@ -50,7 +50,7 @@ public class ManualClassFinder {
     public static Set<Class<?>> findAllClassesUsingClassLoader(final String packageName) {
         LOGGER.debug("Searching for classes in package: {}", packageName);
         final String path = packageName.replaceAll("[.]", "/");
-        final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         try (final InputStream stream = classLoader.getResourceAsStream(path);
              final BufferedReader reader = new BufferedReader(
                      new InputStreamReader(Objects.requireNonNull(stream), UTF_8))) {

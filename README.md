@@ -21,6 +21,7 @@ Writing comprehensive tests for POJOs is tedious and repetitive. **test-pojo** a
 - **Package-level scanning** to test multiple classes at once
 - **Fluent API** for readable test code
 - **Powerful filtering** with predicates for fine-grained control
+- **Parameterized type support** for constructors and method arguments
 - **Comprehensive error messages** with detailed diagnostics
 - **Minimal dependencies** - just Instancio for random data generation
 - **Wide JDK support** - Support JDK 11, 17, 21, 25
@@ -81,7 +82,7 @@ public class MyPojoTest {
 <dependency>
     <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -89,7 +90,7 @@ public class MyPojoTest {
 ### Gradle
 
 ```gradle
-testImplementation 'io.github.temesoft:test-pojo:1.0.3'
+testImplementation 'io.github.temesoft:test-pojo:1.0.4'
 ```
 
 ## Usage

@@ -1,10 +1,11 @@
 package io.github.temesoft.testpojo.model;
 
-public class Pojo1 {
+public class Pojo1 implements PojoInterface {
     private String key;
     private Double value;
     private boolean ready;
 
+    @Override
     public String printValue() {
         return key + "=" + value;
     }
