@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Main entry point for testing POJOs (Plain Old Java Objects).
@@ -82,18 +84,33 @@ public class TestPojo {
     }
 
     /**
-     * Creates a TestPojo instance for testing all classes in a package.
+     * Processes a specific package to initiate testing, automatically excluding the calling class.
+     * <p>
+     * This method identifies the classes within the specified {@code packageName} for testing.
+     * To prevent infinite recursion or redundant testing, it uses a {@link StackWalker}
+     * to automatically identify and add the calling class to the {@code excludeClasses} list.
+     * </p>
      *
-     * @param packageName    the fully qualified package name (e.g., "com.example.model")
-     * @param excludeClasses optional array of classes to exclude from testing
-     * @return a new TestPojo instance
-     * @throws IllegalArgumentException if packageName is null or empty
+     * @param packageName    the fully qualified name of the package to be scanned for test classes
+     * @param excludeClasses optional varargs of classes that should be skipped during processing
+     * @return a {@link TestPojo} initialized with the package name and a distinct list of
+     * excluded classes, including the caller
      */
     public static TestPojo processPackage(final String packageName, final Class<?>... excludeClasses) {
         final TestPojo result = new TestPojo(null, packageName);
-        if (excludeClasses != null) {
-            result.excludeClasses = List.of(excludeClasses);
+        final Class<?> caller = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
+                .walk(frames -> frames.skip(1)
+                        .findFirst()
+                        .map(StackWalker.StackFrame::getDeclaringClass)
+                        .orElse(null));
+        final List<Class<?>> excludes = new ArrayList<>();
+        if (caller != null) {
+            excludes.add(caller);
         }
+        if (excludeClasses != null) {
+            excludes.addAll(List.of(excludeClasses));
+        }
+        result.excludeClasses = excludes.stream().distinct().collect(Collectors.toList());
         return result;
     }
 
