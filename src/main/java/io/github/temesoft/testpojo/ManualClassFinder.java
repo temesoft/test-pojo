@@ -1,16 +1,12 @@
 package io.github.temesoft.testpojo;
 
+import com.google.common.reflect.ClassPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Objects;
+import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Utility class for discovering and loading all classes within a specified package
@@ -38,7 +34,7 @@ public class ManualClassFinder {
      * Finds and loads all classes within the specified package using the system class loader.
      * <p>
      * This method scans the package directory for all .class files and attempts to load
-     * each one. The package is searched using the system class loader's resource mechanism.
+     * each one. The package is searched using Guava's ClassPath
      * </p>
      *
      * @param packageName the fully qualified package name to search (e.g., "com.example.myapp")
@@ -49,17 +45,14 @@ public class ManualClassFinder {
      */
     public static Set<Class<?>> findAllClassesUsingClassLoader(final String packageName) {
         LOGGER.debug("Searching for classes in package: {}", packageName);
-        final String path = packageName.replaceAll("[.]", "/");
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        try (final InputStream stream = classLoader.getResourceAsStream(path);
-             final BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(Objects.requireNonNull(stream), UTF_8))) {
-            return reader.lines()
-                    .filter(line -> line.endsWith(".class"))
-                    .map(line -> getClass(line, packageName))
+        try {
+            return ClassPath.from(Thread.currentThread().getContextClassLoader())
+                    .getTopLevelClasses(packageName)
+                    .stream()
+                    .map(ClassPath.ClassInfo::load)
                     .collect(Collectors.toSet());
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to find classes using ClassLoader in package: " + packageName, e);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to scan classpath for package: " + packageName, e);
         }
     }
 

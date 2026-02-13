@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -222,8 +223,17 @@ final class TestPojoSetterGetter {
                             final ParameterizedType pType = (ParameterizedType) type;
                             final Type[] typeArguments = pType.getActualTypeArguments();
                             final Class<?>[] typeParameters = TestPojoUtils.typesToClasses(typeArguments);
+                            final List<Class<?>> listOfParamClasses = new ArrayList<>();
+                            for (int i = 0; i < typeParameters.length; i++) {
+                                final Class<?> typeParameter = typeParameters[i];
+                                if (i < typeParameters.length - 1) {
+                                    listOfParamClasses.add(typeParameter);
+                                } else {
+                                    listOfParamClasses.add(TestPojoUtils.getGenericTypeToken().getClass());
+                                }
+                            }
                             value = Instancio.of(field.getType())
-                                    .withTypeParameters(typeParameters)
+                                    .withTypeParameters(listOfParamClasses.toArray(new Class[0]))
                                     .create();
                         } else {
                             throw new TestPojoRawUseException(setterMethodFound, field.getType());
@@ -240,6 +250,9 @@ final class TestPojoSetterGetter {
                         message = String.format("\tGetter result value: %s", result);
                         LOGGER.trace(message);
                         reportService.addReportEntry(TestPojoReportService.TestType.SetterGetter, clazz, message);
+                        if (result == value) {
+                            return;
+                        }
                         if (result == null || !result.equals(value)) {
                             throw new TestPojoSetterGetterException(
                                     setterMethodFound,

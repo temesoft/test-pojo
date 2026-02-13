@@ -66,21 +66,21 @@ final class TestPojoConstructor {
      * <ul>
      *   <li>Analyzes each parameter type</li>
      *   <li>Generates appropriate test data using Instancio</li>
-     *   <li>Handles special cases like {@link Constructor}, {@link Class}, {@link Collection}, and {@link Map} types</li>
+     *   <li>Handles special cases like {@link Collection}, and {@link Map} types, interfaces and
+     *   abstract class arguments</li>
      *   <li>Invokes the constructor with the generated arguments</li>
      * </ul>
      * <p>
      * Special handling is provided for:
      * </p>
      * <ul>
-     *   <li>{@link Constructor} parameters - passed as null</li>
-     *   <li>{@link Class} parameters - passed the parameter type itself</li>
+     *   <li>Interfaces and abstract classes - created using proxy model</li>
      *   <li>Generic collections and maps - created with proper type parameters</li>
      *   <li>Other types - created using Instancio's default generation</li>
      * </ul>
      *
      * @throws TestPojoConstructorException if any constructor cannot be instantiated successfully
-     * @throws TestPojoRawUseException      if a {@link Collection} or {@link Map} parameter is used
+     * @throws TestPojoRawUseException      if for example a {@link Collection} or {@link Map} parameter is used
      *                                      without generic type parameters (raw type usage)
      */
     void testClass() {
@@ -125,16 +125,25 @@ final class TestPojoConstructor {
                             final ParameterizedType pType = (ParameterizedType) genericType;
                             final Type[] typeArguments = pType.getActualTypeArguments();
                             final Class<?>[] typeParameters = TestPojoUtils.typesToClasses(typeArguments);
+                            List<Class<?>> listOfParamClasses = new ArrayList<>();
+                            for (int i = 0; i < typeParameters.length; i++) {
+                                final Class<?> typeParameter = typeParameters[i];
+                                if (i < typeParameters.length - 1) {
+                                    listOfParamClasses.add(typeParameter);
+                                } else {
+                                    listOfParamClasses.add(TestPojoUtils.getGenericTypeToken().getClass());
+                                }
+                            }
                             arguments.add(
                                     Instancio.of(parameter.getType())
-                                            .withTypeParameters(typeParameters)
+                                            .withTypeParameters(listOfParamClasses.toArray(new Class[0]))
                                             .create()
                             );
                         } else {
                             throw new TestPojoRawUseException(constructor, parameter.getType());
                         }
                     } else {
-                        arguments.add(Instancio.create(parameter.getType()));
+                        arguments.add(TestPojoUtils.createObject(parameter.getType()));
                     }
                 }
             }

@@ -1,18 +1,23 @@
 package io.github.temesoft.testpojo;
 
 import org.instancio.Instancio;
+import org.instancio.TypeToken;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import static org.instancio.Select.root;
 
 /**
  * Internal utility class providing helper methods for reflection-based testing operations.
@@ -162,9 +167,13 @@ final class TestPojoUtils {
         }
         final List<Class<?>> result = new ArrayList<>();
         for (final Type type : types) {
-            final Class<?> resolvedClass = resolveToClass(type);
-            if (resolvedClass != null) {
-                result.add(resolvedClass);
+            if (type instanceof WildcardType) {
+                result.add(String.class);
+            } else {
+                final Class<?> resolvedClass = resolveToClass(type);
+                if (resolvedClass != null) {
+                    result.add(resolvedClass);
+                }
             }
         }
         return result.toArray(new Class[0]);
@@ -288,11 +297,77 @@ final class TestPojoUtils {
         } else {
             if (clazz.equals(Object.class)) {
                 object = Instancio.create(String.class);
+            } else if (clazz.isInterface()) {
+                object = createInterface(clazz);
             } else {
                 object = Instancio.create(clazz);
             }
 
         }
         return object;
+    }
+
+    /**
+     * Creates a dynamic proxy instance for the specified interface using {@link org.instancio.Instancio}.
+     * <p>
+     * Since interfaces cannot be instantiated directly, this method uses {@link org.instancio.Select#root()}
+     * to supply a {@link java.lang.reflect.Proxy}. This allows the test suite to bypass the
+     * {@code org.instancio.exception.InstancioException} usually thrown when attempting to
+     * create an interface without a concrete subtype.
+     * </p>
+     * <p><b>Default Behavior:</b></p>
+     * <ul>
+     *     <li>{@code toString()}: Returns a string identifying the proxy and interface name.</li>
+     *     <li>{@code hashCode()}: Returns the identity hash code of the proxy instance.</li>
+     *     <li>{@code equals()}: Performs a standard referential equality check.</li>
+     *     <li>All other methods: Return {@code null}.</li>
+     * </ul>
+     *
+     * @param clazz the interface class to be proxied
+     * @return a proxy instance of the specified interface, or {@code null} if creation fails
+     * @throws IllegalArgumentException if the provided {@code clazz} is not an interface
+     *                                  (depending on {@code Proxy.newProxyInstance} constraints)
+     */
+    public static Object createInterface(final Class<?> clazz) {
+        return Instancio.of(clazz)
+                .supply(root(), () -> Proxy.newProxyInstance(
+                        clazz.getClassLoader(),
+                        new Class<?>[]{clazz},
+                        (proxy, method, args) -> {
+                            // Critical: Handle standard methods like toString/hashCode to avoid NPEs
+                            if (method.getName().equals("toString")) return "Proxy<" + clazz.getSimpleName() + ">";
+                            if (method.getName().equals("hashCode")) return System.identityHashCode(proxy);
+                            if (method.getName().equals("equals")) return proxy == args[0];
+                            return null;
+                        }
+                ))
+                .create();
+    }
+
+    /**
+     * Creates a generic {@link org.instancio.TypeToken} used to capture and preserve
+     * full generic type information at runtime.
+     * <p>
+     * This method leverages an anonymous inner class to bypass Java's type erasure,
+     * allowing {@link org.instancio.Instancio} to resolve nested generics such as
+     * {@code Map<String, List<?>>} that would otherwise be lost if passing a
+     * standard {@link java.lang.Class} object.
+     * </p>
+     * <p>
+     * The override of {@link org.instancio.TypeToken#get()} ensures explicit access
+     * to the underlying {@link java.lang.reflect.Type} captured by the token.
+     * </p>
+     *
+     * @return a new instance of a {@code TypeToken} representing the generic type
+     * structure defined at the call site or via type inference.
+     * @see <a href="https://www.instancio.org">Instancio User Guide: Type Tokens</a>
+     */
+    public static TypeToken<?> getGenericTypeToken() {
+        return new TypeToken<>() {
+            @Override
+            public Type get() {
+                return TypeToken.super.get();
+            }
+        };
     }
 }

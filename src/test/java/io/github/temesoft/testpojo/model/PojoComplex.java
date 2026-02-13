@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @Builder
 @SuppressWarnings("unused")
-public class PojoComplex1 {
+public class PojoComplex {
     private String key;
     private Double value;
     private boolean ready;
@@ -23,6 +23,8 @@ public class PojoComplex1 {
     private InnerSimpleEnum innerSimpleEnum;
     private InnerComplexEnum innerComplexEnum;
     private Map<InnerComplexEnum, String> innerComplexEnumStringMap;
+    private SomeInterface someItem1;
+    private PojoExtendingAbstractBase someItem2;
 
     public static String getSomething() {
         return "testing";

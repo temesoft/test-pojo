@@ -1,13 +1,18 @@
 package io.github.temesoft.testpojo;
 
+import com.google.common.reflect.ClassPath;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 
+import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 
 public class ManualClassFinderTest {
 
@@ -20,14 +25,20 @@ public class ManualClassFinderTest {
     }
 
     @Test
-    public void testFindAllClassesUsingClassLoader_NoPackageFound() {
-        final RuntimeException thrown = assertThrows(
-                RuntimeException.class,
-                () -> {
-                    ManualClassFinder.findAllClassesUsingClassLoader("bad-package-name");
-                }
-        );
-        assertEquals("Unable to find classes using ClassLoader in package: bad-package-name", thrown.getMessage());
+    public void testFindAllClassesUsingClassLoader_ExceptionThrown() {
+        try (final MockedStatic<ClassPath> mockedClassPath = mockStatic(ClassPath.class)) {
+            mockedClassPath.when(() -> {
+                        final ClassPath unused = ClassPath.from(any(ClassLoader.class));
+                    })
+                    .thenThrow(new IOException("Simulated IO failure"));
+            final RuntimeException thrown = assertThrows(
+                    RuntimeException.class,
+                    () -> {
+                        ManualClassFinder.findAllClassesUsingClassLoader("bad-package-name");
+                    }
+            );
+            assertEquals("Unable to scan classpath for package: bad-package-name", thrown.getMessage());
+        }
     }
 
     @Test
