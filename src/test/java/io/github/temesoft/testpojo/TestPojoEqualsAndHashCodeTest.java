@@ -3,7 +3,7 @@ package io.github.temesoft.testpojo;
 import io.github.temesoft.testpojo.exception.TestPojoEqualsException;
 import io.github.temesoft.testpojo.exception.TestPojoHashCodeException;
 import io.github.temesoft.testpojo.model.Pojo1;
-import io.github.temesoft.testpojo.model.PojoComplex1;
+import io.github.temesoft.testpojo.model.PojoComplex;
 import io.github.temesoft.testpojo.model.Pojo_BadEquals_1;
 import io.github.temesoft.testpojo.model.Pojo_BadEquals_2;
 import io.github.temesoft.testpojo.model.Pojo_BadEquals_3;
@@ -85,12 +85,12 @@ public class TestPojoEqualsAndHashCodeTest {
 
     @Test
     public void testClassPredicate() {
-        final String report = TestPojo.processClass(Pojo1.class, PojoComplex1.class)
+        final String report = TestPojo.processClass(Pojo1.class, PojoComplex.class)
                 .filterClasses(aClass -> !aClass.equals(Pojo1.class))
                 .testEqualsAndHashCode()
                 .getReport();
         assertFalse(report.contains("Class: " + Pojo1.class.getName()));
-        assertTrue(report.contains("Class: " + PojoComplex1.class.getName()));
+        assertTrue(report.contains("Class: " + PojoComplex.class.getName()));
     }
 
     @Test

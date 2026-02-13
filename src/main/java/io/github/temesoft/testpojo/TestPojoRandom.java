@@ -87,13 +87,15 @@ final class TestPojoRandom {
      *
      * <strong>Parameter generation:</strong>
      * <ul>
-     *   <li>For {@link Collection} and {@link Map} parameters with generic type information:
-     *       creates instances with proper type parameters using Instancio</li>
-     *   <li>For other parameter types: creates random instances using Instancio</li>
+     *   <li>Analyzes each parameter type</li>
+     *   <li>Generates appropriate test data using Instancio</li>
+     *   <li>Handles special cases like {@link Collection}, and {@link Map} types, interfaces and
+     *   abstract class arguments</li>
+     *   <li>Invokes the constructor with the generated arguments</li>
      *   <li>Handles parameterized types by extracting and applying generic type arguments</li>
      * </ul>
      *
-     * @throws TestPojoRawUseException if a {@link Collection} or {@link Map} parameter is encountered
+     * @throws TestPojoRawUseException if a for example {@link Collection} or {@link Map} parameter is encountered
      *                                 without generic type parameters (raw type usage), as this prevents proper test data generation
      * @throws RuntimeException        if any method invocation fails, wrapping the underlying exception
      *                                 with a descriptive message. This typically indicates a bug in the method implementation
@@ -141,8 +143,17 @@ final class TestPojoRandom {
                             final ParameterizedType pType = (ParameterizedType) genericType;
                             final Type[] typeArguments = pType.getActualTypeArguments();
                             final Class<?>[] typeParameters = TestPojoUtils.typesToClasses(typeArguments);
+                            final List<Class<?>> listOfParamClasses = new ArrayList<>();
+                            for (int i = 0; i < typeParameters.length; i++) {
+                                final Class<?> typeParameter = typeParameters[i];
+                                if (i < typeParameters.length - 1) {
+                                    listOfParamClasses.add(typeParameter);
+                                } else {
+                                    listOfParamClasses.add(TestPojoUtils.getGenericTypeToken().getClass());
+                                }
+                            }
                             parameterValue = Instancio.of(parameter.getType())
-                                    .withTypeParameters(typeParameters)
+                                    .withTypeParameters(listOfParamClasses.toArray(new Class[0]))
                                     .create();
                         } else {
                             throw new TestPojoRawUseException(method, parameter.getType());
@@ -169,7 +180,9 @@ final class TestPojoRandom {
                 }
             }
         }
-        LOGGER.trace("Methods tested: {}", methodsRan);
+        final String message = String.format("Methods tested: %s", methodsRan);
+        LOGGER.trace(message);
+        reportService.addReportEntry(TestPojoReportService.TestType.Random, clazz, message);
     }
 
     /**
