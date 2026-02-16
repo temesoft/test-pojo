@@ -284,8 +284,10 @@ final class TestPojoSetterGetter {
     private boolean checkMethodPredicate(final Method setterMethodFound, final Method getterMethodFound) {
         final boolean result = (methodPredicate == null
                 || (methodPredicate.test(setterMethodFound) && methodPredicate.test(getterMethodFound)));
-        LOGGER.trace("Skipping setter method based on predicate: {}", setterMethodFound);
-        LOGGER.trace("Skipping getter method based on predicate: {}", getterMethodFound);
+        if (!result) {
+            LOGGER.trace("Skipping setter method based on predicate: {}", setterMethodFound);
+            LOGGER.trace("Skipping getter method based on predicate: {}", getterMethodFound);
+        }
         return result;
     }
 }

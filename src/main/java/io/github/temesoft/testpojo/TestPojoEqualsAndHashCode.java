@@ -201,7 +201,9 @@ final class TestPojoEqualsAndHashCode {
      */
     private boolean checkMethodPredicate(final Method method) {
         final boolean result = (methodPredicate == null || methodPredicate.test(method));
-        LOGGER.trace("Skipping method based on predicate: {}", method);
+        if (!result) {
+            LOGGER.trace("Skipping method based on predicate: {}", method);
+        }
         return result;
     }
 }
