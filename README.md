@@ -1,5 +1,7 @@
 # test-pojo
 
+![License](https://img.shields.io/github/license/temesoft/test-pojo)
+![Java](https://img.shields.io/badge/Java-11%2B-blue)
 [![Java CI](https://github.com/temesoft/test-pojo/actions/workflows/main.yml/badge.svg)](https://github.com/temesoft/test-pojo/actions/workflows/main.yml)
 [![Javadoc](https://javadoc.io/badge2/io.github.temesoft/test-pojo/javadoc.svg)](https://javadoc.io/doc/io.github.temesoft/test-pojo)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.temesoft/test-pojo.svg)](https://central.sonatype.com/artifact/io.github.temesoft/test-pojo)
