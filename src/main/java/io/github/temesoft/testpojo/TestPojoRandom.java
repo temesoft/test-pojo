@@ -120,14 +120,19 @@ final class TestPojoRandom {
         final Method[] methods = object.getClass().getMethods();
         int methodsRan = 0;
         for (final Method method : methods) {
+            final String methodStringValue = method.toString();
             if (!TestPojoUtils.isMethodExcluded(method, excludeMethods)
                     && !method.getDeclaringClass().equals(Object.class)
                     && !method.getDeclaringClass().equals(Throwable.class)
-                    && !method.toString().contains(".build()")
+                    && !methodStringValue.contains(".build()")
                     && TestPojoUtils.canAccess(method, object)
                     && checkMethodPredicate(method)
-                    && !(clazz.isEnum() && method.toString().contains(".valueOf(java.lang.String)"))
-                    && !(clazz.isEnum() && method.toString().contains(" java.lang.Enum."))) {
+                    && !methodStringValue.contains(".compareTo(java.lang.Object)")
+                    && !methodStringValue.contains(".compare(java.lang.Object,java.lang.Object)")
+                    && !methodStringValue.contains(".test(java.lang.Object)")
+                    && !methodStringValue.contains(".apply(java.lang.Object)")
+                    && !(clazz.isEnum() && methodStringValue.contains(".valueOf(java.lang.String)"))
+                    && !(clazz.isEnum() && methodStringValue.contains(" java.lang.Enum."))) {
                 methodsRan++;
                 String message = String.format("Method: %s", method);
                 LOGGER.trace(message);
@@ -196,7 +201,9 @@ final class TestPojoRandom {
      */
     private boolean checkMethodPredicate(final Method method) {
         final boolean result = (methodPredicate == null || methodPredicate.test(method));
-        LOGGER.trace("Skipping method based on predicate: {}", method);
+        if (!result) {
+            LOGGER.trace("Skipping method based on predicate: {}", method);
+        }
         return result;
     }
 }

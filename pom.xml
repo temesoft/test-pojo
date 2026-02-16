@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.temesoft</groupId>
     <artifactId>test-pojo</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <name>test-pojo</name>
     <description>test-pojo is a lightweight Java testing library that automatically validates your Plain Old Java Objects (POJOs). It uses reflection and the Instancio library to thoroughly test all public methods, getters, setters, equals(), hashCode(), toString(), and constructors with minimal boilerplate code.</description>
     <url>https://github.com/temesoft/test-pojo</url>
@@ -218,16 +218,16 @@
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
                         </path>
-<!--                        <path>-->
-<!--                            <groupId>com.google.errorprone</groupId>-->
-<!--                            <artifactId>error_prone_core</artifactId>-->
-<!--                            <version>2.31.0</version>-->
-<!--                        </path>-->
+                        <path>
+                            <groupId>com.google.errorprone</groupId>
+                            <artifactId>error_prone_core</artifactId>
+                            <version>2.31.0</version>
+                        </path>
                     </annotationProcessorPaths>
-<!--                    <compilerArgs>-->
-<!--                        <arg>-XDcompilePolicy=simple</arg>-->
-<!--                        <arg>-Xplugin:ErrorProne</arg>-->
-<!--                    </compilerArgs>-->
+                    <compilerArgs>
+                        <arg>-XDcompilePolicy=simple</arg>
+                        <arg>-Xplugin:ErrorProne</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>

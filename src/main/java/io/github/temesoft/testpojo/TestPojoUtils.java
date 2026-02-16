@@ -289,6 +289,8 @@ final class TestPojoUtils {
             }
             if (clazz.equals(java.lang.Class.class)) {
                 object = java.lang.String.class;
+            } else if (clazz.isInterface()) {
+                object = createInterface(clazz, typedParameters.toArray(new Class[0]));
             } else {
                 object = Instancio.of(clazz)
                         .withTypeParameters(typedParameters.toArray(new Class[0]))
@@ -328,8 +330,9 @@ final class TestPojoUtils {
      * @throws IllegalArgumentException if the provided {@code clazz} is not an interface
      *                                  (depending on {@code Proxy.newProxyInstance} constraints)
      */
-    public static Object createInterface(final Class<?> clazz) {
+    public static Object createInterface(final Class<?> clazz, final Class<?>... typedParameters) {
         return Instancio.of(clazz)
+                .withTypeParameters(typedParameters)
                 .supply(root(), () -> Proxy.newProxyInstance(
                         clazz.getClassLoader(),
                         new Class<?>[]{clazz},
